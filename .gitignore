@@ -1,0 +1,20 @@
+# Ignore developer-specific workflow configuration files.
+.envrc
+
+# Ignore Azure CLI configuration.
+.azure/
+
+# Compiled binaries
+bin/
+
+# Release artifacts
+dist/
+
+# Terraform artifacts
+**/.terraform
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+
+# The bootstrap layer's state is stored in this repository.
+!terraform/layers/bootstrap/terraform.tfstate
