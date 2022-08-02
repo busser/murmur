@@ -1,6 +1,7 @@
 package whisper
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 
@@ -22,6 +23,10 @@ func Exec(name string, args ...string) (exitCode int, err error) {
 	subCmd.Stderr = os.Stderr
 
 	if err := subCmd.Run(); err != nil {
+		exitErr := new(exec.ExitError)
+		if errors.As(err, &exitErr) {
+			return exitErr.ProcessState.ExitCode(), nil
+		}
 		return 0, err
 	}
 
