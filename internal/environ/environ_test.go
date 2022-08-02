@@ -1,6 +1,7 @@
 package environ
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -38,6 +39,8 @@ func TestToSlice(t *testing.T) {
 
 	for _, tc := range tt {
 		actual := ToSlice(tc.env)
+		sort.Strings(tc.want)
+		sort.Strings(actual)
 		if diff := cmp.Diff(tc.want, actual); diff != "" {
 			t.Errorf("ToMap() mismatch (-want +got):\n%s", diff)
 		}

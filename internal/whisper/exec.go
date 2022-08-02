@@ -1,10 +1,18 @@
 package whisper
 
 import (
+	"errors"
+	"io"
 	"os"
 	"os/exec"
 
 	"github.com/busser/whisper/internal/environ"
+)
+
+// Modified during testing to catch command output.
+var (
+	execOut io.Writer = os.Stdout
+	execErr io.Writer = os.Stderr
 )
 
 func Exec(name string, args ...string) (exitCode int, err error) {
@@ -18,10 +26,14 @@ func Exec(name string, args ...string) (exitCode int, err error) {
 	subCmd := exec.Command(name, args...)
 	subCmd.Env = environ.ToSlice(newVars)
 	subCmd.Stdin = os.Stdin
-	subCmd.Stdout = os.Stdout
-	subCmd.Stderr = os.Stderr
+	subCmd.Stdout = execOut
+	subCmd.Stderr = execErr
 
 	if err := subCmd.Run(); err != nil {
+		exitErr := new(exec.ExitError)
+		if errors.As(err, &exitErr) {
+			return exitErr.ProcessState.ExitCode(), nil
+		}
 		return 0, err
 	}
 
