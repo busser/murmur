@@ -4,44 +4,47 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
+	"sync"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets"
 )
 
 type client struct {
-	vaultURI string
-	client   *azsecrets.Client
+	credential azcore.TokenCredential
+
+	mu           sync.RWMutex // Protects keyvaultClients
+	vaultClients map[string]*azsecrets.Client
 }
 
-// New returns a client that fetches secrets from Azure Key Vault. The vault to
-// fetch from must be specified with the WHISPER_AZURE_KEY_VAULT_URL environment
-// variable.
+// New returns a client that fetches secrets from Azure Key Vault.
 func New() (*client, error) {
-	vaultURL := os.Getenv("WHISPER_AZURE_KEY_VAULT_URL")
-	if vaultURL == "" {
-		return nil, errors.New("WHISPER_AZURE_KEY_VAULT_URL must be set")
-	}
-
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to obtain a credential: %w", err)
 	}
 
-	azClient := azsecrets.NewClient(vaultURL, cred, nil)
-
 	return &client{
-		client: azClient,
+		credential:   cred,
+		vaultClients: make(map[string]*azsecrets.Client),
 	}, nil
 }
 
 func (c *client) Resolve(ctx context.Context, ref string) (string, error) {
-	name, version := parseRef(ref)
+	vault, name, version, err := parseRef(ref)
+	if err != nil {
+		return "", fmt.Errorf("invalid reference: %w", err)
+	}
+
+	c.createClientIfMissing(vault)
+
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	// An empty string version gets the latest version of the secret.
-	resp, err := c.client.GetSecret(ctx, name, version, nil)
+	resp, err := c.vaultClients[vault].GetSecret(ctx, name, version, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to get secret %q version %q: %w", name, version, err)
 	}
@@ -49,10 +52,26 @@ func (c *client) Resolve(ctx context.Context, ref string) (string, error) {
 	return *resp.Value, nil
 }
 
-func parseRef(ref string) (name, version string) {
-	parts := strings.SplitN(ref, "#", 2)
-	if len(parts) < 2 {
-		return ref, ""
+func (c *client) createClientIfMissing(vault string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if c.vaultClients[vault] != nil {
+		return
 	}
-	return parts[0], parts[1]
+
+	vaultURL := fmt.Sprintf("https://%s/", vault)
+	c.vaultClients[vault] = azsecrets.NewClient(vaultURL, c.credential, nil)
+}
+
+func parseRef(ref string) (vaultURL, name, version string, err error) {
+	parts := strings.SplitN(ref, "/", 3)
+	switch {
+	case len(parts) < 2:
+		return "", "", "", errors.New("not enough information")
+	case len(parts) < 3:
+		return parts[0], parts[1], "", nil
+	default:
+		return parts[0], parts[1], parts[2], nil
+	}
 }
