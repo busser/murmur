@@ -11,3 +11,18 @@ jobs:
         with:
           go-version: '1.18'
       - run: make build test
+
+  end-to-end-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
+      - run: make test-e2e
+        env:
+          # These secrets are managed by Terraform. The relevant code is in the
+          # terraform/layers/azure-keyvault directory of this repository.
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
