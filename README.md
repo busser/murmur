@@ -71,22 +71,16 @@ Whisper supports fetching secrets from the following providers.
 
 ### Azure Key Vault
 
-To fetch secrets from Azure Key Vault, you must set the
-`WHISPER_AZURE_KEY_VAULT_URL` variable to the Key Vault instance whisper should
-fetch secrets from. For example:
-
-```plaintext
-WHISPER_AZURE_KEY_VAULT_URL="https://example.vault.azure.net/"
-```
-
 Whisper will fetch secrets from Azure Key Vault for all environment variables
 that start with `azkv:`. What follows the prefix should reference a secret.
 
 Here are some examples:
 
-- `azkv:secret-sauce` references the latest value of the `secret-sauce` secret.
-- `azkv:secret-sauce#5ddc29704c1c4429a4c53605b7949100` references a specific
-  version of the `secret-sauce` secret.
+- `azkv:example.vault.azure.net/secret-sauce` references the latest value of the
+  `secret-sauce` secret in the `example` Key Vault.
+- `azkv:example.vault.azure.net/secret-sauce/5ddc29704c1c4429a4c53605b7949100`
+  references a specific version of the `secret-sauce` secret in the `example`
+  Key Vault.
 
 Whisper uses the environment's default credentials to authenticate to Azure. You
 can set these credentials with the [environment variables listed here](https://github.com/Azure/azure-sdk-for-go/wiki/Set-up-Your-Environment-for-Authentication#configure-defaultazurecredential).
