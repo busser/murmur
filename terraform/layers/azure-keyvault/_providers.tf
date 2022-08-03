@@ -13,3 +13,13 @@ provider "azurerm" {
   # For more information: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#skip_provider_registration
   skip_provider_registration = false
 }
+
+# The "azuread" provider enables us to provision resources in Azure Active
+# Directory.
+provider "azuread" {
+  # Default Directory
+  tenant_id = "0581e2b2-19ee-4e7c-94f7-d3e38a2409df"
+}
+
+# The "github" provider enables us to configure CI/CD on GitHub.
+provider "github" {}
