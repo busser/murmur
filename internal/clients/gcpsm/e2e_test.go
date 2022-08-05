@@ -1,21 +1,21 @@
 //go:build e2e
 
-package azkv_test
+package gcpsm_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/busser/whisper/internal/clients/azkv"
+	"github.com/busser/whisper/internal/clients/gcpsm"
 	"golang.org/x/net/context"
 )
 
 func TestClient(t *testing.T) {
 
 	// The secrets this test reads were created with Terraform. The code is in
-	// the terraform/layers/azure-keyvault directory of this repository.
+	// the terraform/layers/gcp-secret-manager directory of this repository.
 
-	client, err := azkv.New()
+	client, err := gcpsm.New()
 	if err != nil {
 		t.Fatalf("New() returned an error: %v", err)
 	}
@@ -25,51 +25,26 @@ func TestClient(t *testing.T) {
 		wantVal string
 		wantErr bool
 	}{
-		// References to the "alpha" vault.
 		{
-			ref:     "whisper-alpha.vault.azure.net/secret-sauce",
+			ref:     "whisper-tests/secret-sauce",
 			wantVal: "szechuan",
 			wantErr: false,
 		},
 		{
-			ref:     "whisper-alpha.vault.azure.net/secret-sauce/0c2fd54cde7e494faad53882524d358f",
+			ref:     "whisper-tests/secret-sauce/4",
 			wantVal: "szechuan",
 			wantErr: false,
 		},
 		{
-			ref:     "whisper-alpha.vault.azure.net/secret-sauce/73f5e5ff35a44cdab53b7a34c18da367",
+			ref:     "whisper-tests/secret-sauce/3",
 			wantVal: "ketchup",
 			wantErr: false,
 		},
 		{
-			ref:     "whisper-alpha.vault.azure.net/does-not-exist",
+			ref:     "whisper-tests/does-not-exist",
 			wantVal: "",
 			wantErr: true,
 		},
-
-		// References to the "bravo" vault.
-		{
-			ref:     "whisper-bravo.vault.azure.net/secret-sauce",
-			wantVal: "szechuan",
-			wantErr: false,
-		},
-		{
-			ref:     "whisper-bravo.vault.azure.net/secret-sauce/b5f5287b95b24491a7ec5bb6a19ff341",
-			wantVal: "szechuan",
-			wantErr: false,
-		},
-		{
-			ref:     "whisper-bravo.vault.azure.net/secret-sauce/03bb1bf7a5b44bb28508a6de043faf3c",
-			wantVal: "ketchup",
-			wantErr: false,
-		},
-		{
-			ref:     "whisper-bravo.vault.azure.net/does-not-exist",
-			wantVal: "",
-			wantErr: true,
-		},
-
-		// Other references.
 		{
 			ref:     "invalid-ref",
 			wantVal: "",

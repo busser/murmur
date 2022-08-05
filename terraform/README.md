@@ -20,6 +20,13 @@ permissions to manage the infrastructure. To log in, run this command:
 az login
 ```
 
+You must be authenticated to a Google account that has the necessary permissions
+to manage the infrastructure. To log in, run this command:
+
+```bash
+gcloud auth application-default login
+```
+
 You must also set the `GITHUB_TOKEN` environment variable to a personal access
 token with the necessary permissions to manage this repository's secrets, and
 the `GITHUB_OWNER` environment variable to `busser`, this repository's owner.

@@ -83,14 +83,27 @@ Here are some examples:
   Key Vault.
 
 Whisper uses the environment's default credentials to authenticate to Azure. You
-can set these credentials with the [environment variables listed here](https://github.com/Azure/azure-sdk-for-go/wiki/Set-up-Your-Environment-for-Authentication#configure-defaultazurecredential).
+can set these credentials with the [environment variables listed here](https://github.com/Azure/azure-sdk-for-go/wiki/Set-up-Your-Environment-for-Authentication#configure-defaultazurecredential),
+or with workload identity.
 
 ### Google Secret Manager
 
-Not yet supported.
+Whisper will fetch secrets from Google Cloud Platform's Secret Manager for all
+environment variables that start with `gcpsm:`. What follows the prefix should
+reference a secret.
 
-You may want to have a look at [berglas](https://github.com/GoogleCloudPlatform/berglas)
-in the mean time.
+Here are some examples:
+
+- `gcpsm:example/secret-sauce` references the latest value of the
+  `secret-sauce` secret in the `example` project.
+- `gcpsm:example/secret-sauce/123` references a specific version of the
+- `secret-sauce` secret in the `example` project.
+
+Whisper uses the environment's default credentials to authenticate to Google
+Cloud. You can set these with the `gcloud` CLI, with environment variables,
+with Google Cloud's environment service accounts, or with workload identity.
+
+An alternative to whisper, specific to Google Cloud, is [berglas](https://github.com/GoogleCloudPlatform/berglas).
 
 ### Hashicorp Vault
 

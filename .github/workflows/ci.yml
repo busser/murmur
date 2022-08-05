@@ -14,11 +14,30 @@ jobs:
 
   end-to-end-tests:
     runs-on: ubuntu-latest
+
+    # Required for workload identity, which end-to-end tests use to authenticate
+    # to Google Cloud.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
           go-version: '1.18'
+
+      # This service account and the workload identity setup required for
+      # Github Actions to use the service account are managed by Terraform.
+      # The relevant code is in the terraform/layers/gcp-secret-manager
+      # directory of this repository.
+      - uses: google-github-actions/auth@v0
+        with:
+          workload_identity_provider: 'projects/841223787188/locations/global/workloadIdentityPools/default/providers/github-oidc'
+          service_account: 'github-actions@whisper-tests.iam.gserviceaccount.com'
+          token_format: 'access_token'
+          access_token_lifetime: '300s'
+
       - run: make test-e2e
         env:
           # These secrets are managed by Terraform. The relevant code is in the
