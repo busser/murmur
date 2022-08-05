@@ -4,6 +4,9 @@
 # Ignore Azure CLI configuration.
 .azure/
 
+# Ignore Google Cloud SDK.
+.gcloud/
+
 # Compiled binaries
 bin/
 
