@@ -52,24 +52,34 @@ func TestClient(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tt {
-		tc := tc // capture range variable
-		t.Run(tc.ref, func(t *testing.T) {
-			t.Parallel()
+	// Test cases are grouped such that they run in parallel and we can perform
+	// cleanup once they are done.
+	t.Run("group", func(t *testing.T) {
 
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			defer cancel()
+		for _, tc := range tt {
+			tc := tc // capture range variable
+			t.Run(tc.ref, func(t *testing.T) {
+				t.Parallel()
 
-			actualVal, err := client.Resolve(ctx, tc.ref)
-			if err != nil && !tc.wantErr {
-				t.Errorf("Resolve() returned an error: %v", err)
-			}
-			if err == nil && tc.wantErr {
-				t.Error("Resolve() did not return an error")
-			}
-			if actualVal != tc.wantVal {
-				t.Errorf("Resolve() == %#v, want %#v", actualVal, tc.wantVal)
-			}
-		})
+				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
+
+				actualVal, err := client.Resolve(ctx, tc.ref)
+				if err != nil && !tc.wantErr {
+					t.Errorf("Resolve() returned an error: %v", err)
+				}
+				if err == nil && tc.wantErr {
+					t.Error("Resolve() did not return an error")
+				}
+				if actualVal != tc.wantVal {
+					t.Errorf("Resolve() == %#v, want %#v", actualVal, tc.wantVal)
+				}
+			})
+		}
+
+	})
+
+	if err := client.Close(); err != nil {
+		t.Fatalf("Close() returned an error: %v", err)
 	}
 }

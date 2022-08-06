@@ -52,6 +52,12 @@ func (c *client) Resolve(ctx context.Context, ref string) (string, error) {
 	return *resp.Value, nil
 }
 
+func (c *client) Close() error {
+	// The client does not need to close its underlying Azure clients.
+	// ?(busser): are we sure about this? do any connections need to be closed?
+	return nil
+}
+
 func (c *client) createClientIfMissing(vault string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()

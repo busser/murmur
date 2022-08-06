@@ -56,15 +56,25 @@ func TestResolveAll(t *testing.T) {
 	if diff := cmp.Diff(want, actual); diff != "" {
 		t.Errorf("ResolveAll() mismatch (-want +got):\n%s", diff)
 	}
+
+	if !fooClient.Closed() {
+		t.Errorf("ResolveAll() did not close the \"foo:\" client")
+	}
+	if !barClient.Closed() {
+		t.Errorf("ResolveAll() did not close the \"bar:\" client")
+	}
 }
 
 func TestResolveAllWithError(t *testing.T) {
+	fooClient, _ := mock.New()
+	barClient, _ := mock.New()
+
 	// Replace whisper's clients with mocks for the duration of the test.
 	originalClientFactories := ClientFactories
 	defer func() { ClientFactories = originalClientFactories }()
 	ClientFactories = map[string]ClientFactory{
-		"foo": func() (Client, error) { return mock.New() },
-		"bar": func() (Client, error) { return mock.New() },
+		"foo": func() (Client, error) { return fooClient, nil },
+		"bar": func() (Client, error) { return barClient, nil },
 	}
 
 	envVars := map[string]string{
@@ -94,5 +104,12 @@ func TestResolveAllWithError(t *testing.T) {
 		if strings.Contains(errMsg, s) {
 			t.Errorf("Error message %q should not mention %q", errMsg, s)
 		}
+	}
+
+	if !fooClient.Closed() {
+		t.Errorf("ResolveAll() did not close the \"foo:\" client")
+	}
+	if !barClient.Closed() {
+		t.Errorf("ResolveAll() did not close the \"bar:\" client")
 	}
 }
