@@ -2,11 +2,13 @@ package mock
 
 import (
 	"context"
+	"errors"
 	"fmt"
 )
 
 type client struct {
 	resolvedRefs []string
+	closed       bool
 }
 
 // New returns a client that fetches no secrets, and simply
@@ -22,6 +24,20 @@ func (c *client) Resolve(ctx context.Context, ref string) (string, error) {
 	}
 
 	return ValueFor(ref), nil
+}
+
+func (c *client) Close() error {
+	if c.closed {
+		return errors.New("already closed")
+	}
+
+	c.closed = true
+
+	return nil
+}
+
+func (c *client) Closed() bool {
+	return c.closed
 }
 
 func (c *client) ResolvedRefs() []string {

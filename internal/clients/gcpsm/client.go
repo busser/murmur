@@ -21,9 +21,6 @@ func New() (*client, error) {
 		return nil, fmt.Errorf("failed to setup client: %w", err)
 	}
 
-	// TODO(busser): How to handle closing of client?
-	// defer c.Close()
-
 	return &client{
 		gcpClient: c,
 	}, nil
@@ -44,6 +41,10 @@ func (c *client) Resolve(ctx context.Context, ref string) (string, error) {
 	}
 
 	return string(resp.Payload.Data), nil
+}
+
+func (c *client) Close() error {
+	return c.gcpClient.Close()
 }
 
 func parseRef(ref string) (project, name, version string, err error) {

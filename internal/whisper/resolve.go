@@ -13,8 +13,14 @@ import (
 
 // A Client fetches values from a secret store.
 type Client interface {
-	// Resolve returns the value of the secret with the given ref.
+	// Resolve returns the value of the secret with the given ref. Resolve never
+	// gets called after Close.
 	Resolve(ctx context.Context, ref string) (string, error)
+
+	// Close signals to the client that it can release any resources it has
+	// allocated, like network connections. Close should return once those
+	// resources are released.
+	Close() error
 }
 
 // A ClientFactory returns a new Client.
@@ -64,12 +70,16 @@ func ResolveAll(vars map[string]string) (map[string]string, error) {
 			err = multierror.Append(err, fmt.Errorf("no client for prefix %q", prefix))
 			continue
 		}
+
 		client, clientErr := newClient()
 		if clientErr != nil {
 			err = multierror.Append(err, fmt.Errorf("client for %q: %w", prefix, clientErr))
 			continue
 		}
+
 		clientByPrefix[prefix] = client
+
+		defer client.Close() // TODO(busser): handle error (log it?)
 	}
 	if err != nil {
 		return nil, err

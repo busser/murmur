@@ -21,6 +21,8 @@ func TestClient(t *testing.T) {
 			if err != nil {
 				t.Fatalf("New() returned an error: %v", err)
 			}
+			defer c.Close()
+
 			val, err := c.Resolve(context.Background(), tc.ref)
 			if err != nil {
 				t.Fatalf("Resolve() returned an error: %v", err)

@@ -15,3 +15,8 @@ func New() (*client, error) {
 func (c *client) Resolve(ctx context.Context, ref string) (string, error) {
 	return ref, nil
 }
+
+func (c *client) Close() error {
+	// The client has no resources to free.
+	return nil
+}
