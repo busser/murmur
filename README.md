@@ -78,7 +78,7 @@ Here are some examples:
 
 - `azkv:example.vault.azure.net/secret-sauce` references the latest value of the
   `secret-sauce` secret in the `example` Key Vault.
-- `azkv:example.vault.azure.net/secret-sauce/5ddc29704c1c4429a4c53605b7949100`
+- `azkv:example.vault.azure.net/secret-sauce#5ddc29704c1c4429a4c53605b7949100`
   references a specific version of the `secret-sauce` secret in the `example`
   Key Vault.
 
@@ -96,7 +96,7 @@ Here are some examples:
 
 - `gcpsm:example/secret-sauce` references the latest value of the
   `secret-sauce` secret in the `example` project.
-- `gcpsm:example/secret-sauce/123` references a specific version of the
+- `gcpsm:example/secret-sauce#123` references a specific version of the
 - `secret-sauce` secret in the `example` project.
 
 Whisper uses the environment's default credentials to authenticate to Google

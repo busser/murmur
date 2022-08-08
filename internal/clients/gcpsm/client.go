@@ -48,13 +48,22 @@ func (c *client) Close() error {
 }
 
 func parseRef(ref string) (project, name, version string, err error) {
-	parts := strings.SplitN(ref, "/", 3)
-	switch {
-	case len(parts) < 2:
-		return "", "", "", errors.New("not enough information")
-	case len(parts) < 3:
-		return parts[0], parts[1], "latest", nil
-	default:
-		return parts[0], parts[1], parts[2], nil
+	refParts := strings.SplitN(ref, "#", 2)
+	if len(refParts) < 1 {
+		return "", "", "", errors.New("invalid syntax")
 	}
+	fullname := refParts[0]
+	version = "latest"
+	if len(refParts) == 2 {
+		version = refParts[1]
+	}
+
+	fullnameParts := strings.SplitN(fullname, "/", 2)
+	if len(fullnameParts) < 2 {
+		return "", "", "", errors.New("invalid syntax")
+	}
+	project = fullnameParts[0]
+	name = fullnameParts[1]
+
+	return project, name, version, nil
 }

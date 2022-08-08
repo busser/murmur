@@ -32,12 +32,12 @@ func TestClient(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			ref:     "whisper-alpha.vault.azure.net/secret-sauce/0c2fd54cde7e494faad53882524d358f",
+			ref:     "whisper-alpha.vault.azure.net/secret-sauce#0c2fd54cde7e494faad53882524d358f",
 			wantVal: "szechuan",
 			wantErr: false,
 		},
 		{
-			ref:     "whisper-alpha.vault.azure.net/secret-sauce/73f5e5ff35a44cdab53b7a34c18da367",
+			ref:     "whisper-alpha.vault.azure.net/secret-sauce#73f5e5ff35a44cdab53b7a34c18da367",
 			wantVal: "ketchup",
 			wantErr: false,
 		},
@@ -54,12 +54,12 @@ func TestClient(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			ref:     "whisper-bravo.vault.azure.net/secret-sauce/b5f5287b95b24491a7ec5bb6a19ff341",
+			ref:     "whisper-bravo.vault.azure.net/secret-sauce#b5f5287b95b24491a7ec5bb6a19ff341",
 			wantVal: "szechuan",
 			wantErr: false,
 		},
 		{
-			ref:     "whisper-bravo.vault.azure.net/secret-sauce/03bb1bf7a5b44bb28508a6de043faf3c",
+			ref:     "whisper-bravo.vault.azure.net/secret-sauce#03bb1bf7a5b44bb28508a6de043faf3c",
 			wantVal: "ketchup",
 			wantErr: false,
 		},

@@ -31,12 +31,12 @@ func TestClient(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			ref:     "whisper-tests/secret-sauce/4",
+			ref:     "whisper-tests/secret-sauce#4",
 			wantVal: "szechuan",
 			wantErr: false,
 		},
 		{
-			ref:     "whisper-tests/secret-sauce/3",
+			ref:     "whisper-tests/secret-sauce#3",
 			wantVal: "ketchup",
 			wantErr: false,
 		},
