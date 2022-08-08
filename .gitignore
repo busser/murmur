@@ -1,10 +1,13 @@
 # Ignore developer-specific workflow configuration files.
 .envrc
 
-# Ignore Azure CLI configuration.
+# Ignore Azure client configuration.
 .azure/
 
-# Ignore Google Cloud SDK.
+# Ignore AWS client configuration.
+.aws/
+
+# Ignore Google Cloud client configuration.
 .gcloud/
 
 # Compiled binaries

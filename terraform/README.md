@@ -27,6 +27,11 @@ to manage the infrastructure. To log in, run this command:
 gcloud auth application-default login
 ```
 
+You must be authenticated as an AWS user that has the necessary permissions
+to manage the infrastructure. Do this by setting the necessary environment
+variables. You must also set the `AWS_REGION` environment variable to
+`eu-west-3`.
+
 You must also set the `GITHUB_TOKEN` environment variable to a personal access
 token with the necessary permissions to manage this repository's secrets, and
 the `GITHUB_OWNER` environment variable to `busser`, this repository's owner.

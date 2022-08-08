@@ -20,6 +20,7 @@ terraform {
     key      = "gcp-secret-manager"
     region   = "fr-par"
     endpoint = "https://s3.fr-par.scw.cloud"
+    profile  = "scaleway"
     # We are swapping the AWS S3 API for the Scaleway S3 API, so we need to 
     # skip certain validation steps.
     skip_credentials_validation = true

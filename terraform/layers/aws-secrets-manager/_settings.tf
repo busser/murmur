@@ -17,7 +17,7 @@ terraform {
   # For more information on the "s3" backend: https://www.terraform.io/docs/language/settings/backends/s3.html
   backend "s3" {
     bucket   = "b4r-whisper-tfstate"
-    key      = "azurerm-keyvault"
+    key      = "aws-secrets-manager"
     region   = "fr-par"
     endpoint = "https://s3.fr-par.scw.cloud"
     profile  = "scaleway"
@@ -30,17 +30,9 @@ terraform {
   # This layer requires that certain providers be configured by the caller.
   # For more information: https://www.terraform.io/docs/language/providers/requirements.html
   required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "3.15.0"
-    }
-    azuread = {
-      source  = "hashicorp/azuread"
-      version = "2.26.1"
-    }
-    github = {
-      source  = "integrations/github"
-      version = "4.28.0"
+    aws = {
+      source  = "hashicorp/aws"
+      version = "4.25.0"
     }
   }
 }

@@ -114,7 +114,29 @@ in the mean time.
 
 ### AWS Secrets Manager
 
-Not yet supported.
+Whisper will fetch secrets from AWS Secrets Manager for all environment
+variables that start with `awssm:`. What follows the prefix should reference a
+secret.
+
+Here are some examples:
+
+- `awssm:secret-sauce` references the current value of the `secret-sauce` secret
+  in the region and account defined by the environment.
+- `awssm:secret-sauce#9517cc59-646a-4393-81d7-5e6f2d43cbe7` references a
+  specific version of the `secret-sauce` secret in the region and account
+  defined by the environment.
+- `awssm:secret-sauce#my-label` references a specific staging label of the
+  `secret-sauce` secret in the region and account defined by the environment.
+- `awssm:arn:aws:secretsmanager:us-east-1:123456789012:secret:secret-sauce-abcdef`
+  references the secret with the specified ARN.
+- `awssm:arn:aws:secretsmanager:us-east-1:123456789012:secret:secret-sauce-abcdef#my-label`
+  references a specific staging label of the secret with the specified ARN.
+
+The string that comes after `#` could be a version ID or a version label. If the
+string is a UUID, then whisper assumes it is a version ID. Otherwise, it assumes
+it is a version label.
+
+Whisper uses the environment's default credentials to authenticate to AWS.
 
 ### Passthrough
 
