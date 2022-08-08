@@ -9,7 +9,7 @@ terraform {
   # all 1.0.x versions.
   #
   # For more information: https://www.terraform.io/docs/language/settings/index.html#specifying-a-required-terraform-version
-  required_version = "= 1.1.9"
+  required_version = "= 1.2.6"
 
   # This layer's state is stored locally and persisted in the git repository.
   backend "local" {}
@@ -19,7 +19,7 @@ terraform {
   required_providers {
     scaleway = {
       source  = "scaleway/scaleway"
-      version = "2.2.1-rc.3"
+      version = "2.2.7"
     }
   }
 }
