@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # Required for workload identity, which end-to-end tests use to authenticate
-    # to Google Cloud.
+    # to Google Cloud and AWS.
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -37,6 +37,16 @@ jobs:
           service_account: 'github-actions@whisper-tests.iam.gserviceaccount.com'
           token_format: 'access_token'
           access_token_lifetime: '300s'
+
+      # This role and the workload identity setup required for Github Actions to
+      # use the role are managed by Terraform.
+      # The relevant code is in the terraform/layers/aws-secrets-manager
+      # directory of this repository.
+      - uses: aws-actions/configure-aws-credentials@v1
+        timeout-minutes: 1
+        with:
+          aws-region: eu-west-3
+          role-to-assume: arn:aws:iam::531255069405:role/GithubActions
 
       - run: make test-e2e
         env:
