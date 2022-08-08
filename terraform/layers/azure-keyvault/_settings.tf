@@ -9,7 +9,7 @@ terraform {
   # all 1.0.x versions.
   #
   # For more information: https://www.terraform.io/docs/language/settings/index.html#specifying-a-required-terraform-version
-  required_version = "= 1.1.9"
+  required_version = "= 1.2.6"
 
   # Terraform keeps track of all resources it knows of in its state. This state
   # can be stored remotely in a "backend".
@@ -32,11 +32,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "3.15.0"
+      version = "3.17.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "2.26.1"
+      version = "2.27.0"
     }
     github = {
       source  = "integrations/github"
