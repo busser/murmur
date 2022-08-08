@@ -7,7 +7,9 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 
+	"github.com/busser/whisper/internal/clients/awssm"
 	"github.com/busser/whisper/internal/clients/azkv"
+	"github.com/busser/whisper/internal/clients/gcpsm"
 	"github.com/busser/whisper/internal/clients/passthrough"
 )
 
@@ -32,6 +34,10 @@ var ClientFactories = map[string]ClientFactory{
 	"passthrough": func() (Client, error) { return passthrough.New() },
 	// Azure Key Vault
 	"azkv": func() (Client, error) { return azkv.New() },
+	// Google Cloud Secret Manager
+	"gcpsm": func() (Client, error) { return gcpsm.New() },
+	// AWS Secrets Manager
+	"awssm": func() (Client, error) { return awssm.New() },
 }
 
 // ResolveAll returns a map with the same keys as vars, where all values with
