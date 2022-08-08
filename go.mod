@@ -9,7 +9,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets v0.8.0
 	github.com/aws/aws-sdk-go v1.44.70
 	github.com/google/go-cmp v0.5.8
-	github.com/google/uuid v1.1.2
+	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/spf13/cobra v1.5.0
 	golang.org/x/net v0.0.0-20220805013720-a33c5aa5df48
