@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go/secretmanager v1.5.0
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.1.1
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.1.2
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.1.0
 	github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets v0.9.0
 	github.com/aws/aws-sdk-go v1.44.70
