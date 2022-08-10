@@ -67,6 +67,8 @@ github.com/Azure/azure-sdk-for-go/sdk/internal v1.0.0 h1:jp0dGvZ7ZK0mgqnTSClMxa5
 github.com/Azure/azure-sdk-for-go/sdk/internal v1.0.0/go.mod h1:eWRD7oawr1Mu1sLCawqVc0CUiF43ia3qQMxLscsKQ9w=
 github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets v0.8.0 h1:A6Kf8v5DPFR+V7/qQOefHEU8W71OBVJvXu7UO0EHJkA=
 github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets v0.8.0/go.mod h1:u5EGU7cPuj/T2qhJWXDbWgv0dy3ORAEaAzR1zP6p4X8=
+github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets v0.9.0 h1:XcfJhu06i3ugG2XnQxHTvIyZTQyxHSw1RlGuJCewQk0=
+github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets v0.9.0/go.mod h1:u5EGU7cPuj/T2qhJWXDbWgv0dy3ORAEaAzR1zP6p4X8=
 github.com/Azure/azure-sdk-for-go/sdk/keyvault/internal v0.5.0 h1:9cn6ICCGiWFNA/slKnrkf+ENyvaCRKHtuoGtnLIAgao=
 github.com/Azure/azure-sdk-for-go/sdk/keyvault/internal v0.5.0/go.mod h1:9V2j0jn9jDEkCkv8w/bKTNppX/d0FVA1ud77xCIP4KA=
 github.com/AzureAD/microsoft-authentication-library-for-go v0.5.1 h1:BWe8a+f/t+7KY7zH2mqygeUD0t8hNFXe08p1Pb3/jKE=
