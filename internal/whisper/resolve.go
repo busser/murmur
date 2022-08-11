@@ -7,37 +7,38 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 
-	"github.com/busser/whisper/internal/whisper/clients/awssm"
-	"github.com/busser/whisper/internal/whisper/clients/azkv"
-	"github.com/busser/whisper/internal/whisper/clients/gcpsm"
-	"github.com/busser/whisper/internal/whisper/clients/passthrough"
+	"github.com/busser/whisper/internal/whisper/providers/awssm"
+	"github.com/busser/whisper/internal/whisper/providers/azkv"
+	"github.com/busser/whisper/internal/whisper/providers/gcpsm"
+	"github.com/busser/whisper/internal/whisper/providers/passthrough"
 )
 
-// A Client fetches values from a secret store.
-type Client interface {
+// A Provider fetches values from a secret store.
+type Provider interface {
 	// Resolve returns the value of the secret with the given ref. Resolve never
 	// gets called after Close.
 	Resolve(ctx context.Context, ref string) (string, error)
 
-	// Close signals to the client that it can release any resources it has
+	// Close signals to the provider that it can release any resources it has
 	// allocated, like network connections. Close should return once those
 	// resources are released.
 	Close() error
 }
 
-// A ClientFactory returns a new Client.
-type ClientFactory func() (Client, error)
+// A ProviderFactory returns a new Provider.
+type ProviderFactory func() (Provider, error)
 
-// ClientFactories contains a ClientFactory for each prefix known to whisper.
-var ClientFactories = map[string]ClientFactory{
+// ProviderFactories contains a ProviderFactory for each prefix known to
+// whisper.
+var ProviderFactories = map[string]ProviderFactory{
 	// Passthrough
-	"passthrough": func() (Client, error) { return passthrough.New() },
+	"passthrough": func() (Provider, error) { return passthrough.New() },
 	// Azure Key Vault
-	"azkv": func() (Client, error) { return azkv.New() },
+	"azkv": func() (Provider, error) { return azkv.New() },
 	// Google Cloud Secret Manager
-	"gcpsm": func() (Client, error) { return gcpsm.New() },
+	"gcpsm": func() (Provider, error) { return gcpsm.New() },
 	// AWS Secrets Manager
-	"awssm": func() (Client, error) { return awssm.New() },
+	"awssm": func() (Provider, error) { return awssm.New() },
 }
 
 // ResolveAll returns a map with the same keys as vars, where all values with
@@ -60,7 +61,7 @@ func ResolveAll(vars map[string]string) (map[string]string, error) {
 		prefix := split[0]
 
 		// If the variable has an unknown prefix, then whisper should ignore it.
-		if _, known := ClientFactories[prefix]; !known {
+		if _, known := ProviderFactories[prefix]; !known {
 			continue
 		}
 
@@ -69,23 +70,23 @@ func ResolveAll(vars map[string]string) (map[string]string, error) {
 
 	var err error
 
-	clientByPrefix := make(map[string]Client)
+	providerByPrefix := make(map[string]Provider)
 	for prefix := range varsByPrefix {
-		newClient, known := ClientFactories[prefix]
+		newProvider, known := ProviderFactories[prefix]
 		if !known {
-			err = multierror.Append(err, fmt.Errorf("no client for prefix %q", prefix))
+			err = multierror.Append(err, fmt.Errorf("no provider for prefix %q", prefix))
 			continue
 		}
 
-		client, clientErr := newClient()
-		if clientErr != nil {
-			err = multierror.Append(err, fmt.Errorf("client for %q: %w", prefix, clientErr))
+		provider, providerErr := newProvider()
+		if providerErr != nil {
+			err = multierror.Append(err, fmt.Errorf("provider for %q: %w", prefix, providerErr))
 			continue
 		}
 
-		clientByPrefix[prefix] = client
+		providerByPrefix[prefix] = provider
 
-		defer client.Close() // TODO(busser): handle error (log it?)
+		defer provider.Close() // TODO(busser): handle error (log it?)
 	}
 	if err != nil {
 		return nil, err
@@ -93,10 +94,10 @@ func ResolveAll(vars map[string]string) (map[string]string, error) {
 
 	newVars := make(map[string]string)
 	for prefix, keys := range varsByPrefix {
-		c := clientByPrefix[prefix]
+		p := providerByPrefix[prefix]
 		for _, k := range keys {
 			ref := strings.TrimPrefix(vars[k], prefix+":")
-			val, resolveErr := c.Resolve(context.TODO(), ref)
+			val, resolveErr := p.Resolve(context.TODO(), ref)
 			if resolveErr != nil {
 				err = multierror.Append(err, fmt.Errorf("%s: %w", k, resolveErr))
 				continue

@@ -8,7 +8,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/busser/whisper/internal/whisper/clients/awssm"
+	"github.com/busser/whisper/internal/whisper/providers/awssm"
 )
 
 func TestClient(t *testing.T) {
