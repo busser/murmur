@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/busser/whisper/internal/whisper/clients/mock"
+	"github.com/busser/whisper/internal/whisper/providers/mock"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -13,11 +13,11 @@ func TestResolveAll(t *testing.T) {
 	barClient, _ := mock.New()
 
 	// Replace whisper's clients with mocks for the duration of the test.
-	originalClientFactories := ClientFactories
-	defer func() { ClientFactories = originalClientFactories }()
-	ClientFactories = map[string]ClientFactory{
-		"foo": func() (Client, error) { return fooClient, nil },
-		"bar": func() (Client, error) { return barClient, nil },
+	originalClientFactories := ProviderFactories
+	defer func() { ProviderFactories = originalClientFactories }()
+	ProviderFactories = map[string]ProviderFactory{
+		"foo": func() (Provider, error) { return fooClient, nil },
+		"bar": func() (Provider, error) { return barClient, nil },
 	}
 
 	envVars := map[string]string{
@@ -70,11 +70,11 @@ func TestResolveAllWithError(t *testing.T) {
 	barClient, _ := mock.New()
 
 	// Replace whisper's clients with mocks for the duration of the test.
-	originalClientFactories := ClientFactories
-	defer func() { ClientFactories = originalClientFactories }()
-	ClientFactories = map[string]ClientFactory{
-		"foo": func() (Client, error) { return fooClient, nil },
-		"bar": func() (Client, error) { return barClient, nil },
+	originalClientFactories := ProviderFactories
+	defer func() { ProviderFactories = originalClientFactories }()
+	ProviderFactories = map[string]ProviderFactory{
+		"foo": func() (Provider, error) { return fooClient, nil },
+		"bar": func() (Provider, error) { return barClient, nil },
 	}
 
 	envVars := map[string]string{

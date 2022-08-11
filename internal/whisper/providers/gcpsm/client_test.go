@@ -1,20 +1,20 @@
-package azkv_test
+package gcpsm_test
 
 import (
 	"context"
 	"fmt"
 	"log"
 
-	"github.com/busser/whisper/internal/whisper/clients/azkv"
+	"github.com/busser/whisper/internal/whisper/providers/gcpsm"
 )
 
 func Example() {
-	c, err := azkv.New()
+	c, err := gcpsm.New()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ref := "example.vault.azure.net/secret-sauce"
+	ref := "example-project/secret-sauce"
 	val, err := c.Resolve(context.Background(), ref)
 	if err != nil {
 		log.Fatal(err)
