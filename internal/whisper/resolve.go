@@ -7,10 +7,10 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 
-	"github.com/busser/whisper/internal/clients/awssm"
-	"github.com/busser/whisper/internal/clients/azkv"
-	"github.com/busser/whisper/internal/clients/gcpsm"
-	"github.com/busser/whisper/internal/clients/passthrough"
+	"github.com/busser/whisper/internal/whisper/clients/awssm"
+	"github.com/busser/whisper/internal/whisper/clients/azkv"
+	"github.com/busser/whisper/internal/whisper/clients/gcpsm"
+	"github.com/busser/whisper/internal/whisper/clients/passthrough"
 )
 
 // A Client fetches values from a secret store.

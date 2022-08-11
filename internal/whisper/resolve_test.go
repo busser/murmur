@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/busser/whisper/internal/clients/mock"
+	"github.com/busser/whisper/internal/whisper/clients/mock"
 	"github.com/google/go-cmp/cmp"
 )
 

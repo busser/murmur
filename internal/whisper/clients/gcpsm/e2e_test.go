@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/busser/whisper/internal/clients/gcpsm"
+	"github.com/busser/whisper/internal/whisper/clients/gcpsm"
 	"golang.org/x/net/context"
 )
 
