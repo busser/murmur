@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/busser/whisper/internal/clients/azkv"
+	"github.com/busser/whisper/internal/whisper/clients/azkv"
 )
 
 func Example() {
