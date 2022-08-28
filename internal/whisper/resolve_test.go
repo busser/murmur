@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/busser/whisper/internal/whisper/providers/jsonmock"
 	"github.com/busser/whisper/internal/whisper/providers/mock"
 	"github.com/google/go-cmp/cmp"
 )
@@ -11,13 +12,15 @@ import (
 func TestResolveAll(t *testing.T) {
 	fooClient, _ := mock.New()
 	barClient, _ := mock.New()
+	jsonClient, _ := jsonmock.New()
 
 	// Replace whisper's clients with mocks for the duration of the test.
 	originalClientFactories := ProviderFactories
 	defer func() { ProviderFactories = originalClientFactories }()
 	ProviderFactories = map[string]ProviderFactory{
-		"foo": func() (Provider, error) { return fooClient, nil },
-		"bar": func() (Provider, error) { return barClient, nil },
+		"foo":  func() (Provider, error) { return fooClient, nil },
+		"bar":  func() (Provider, error) { return barClient, nil },
+		"json": func() (Provider, error) { return jsonClient, nil },
 	}
 
 	envVars := map[string]string{
@@ -27,6 +30,7 @@ func TestResolveAll(t *testing.T) {
 		"SECOND_SECRET":       "foo:private key",
 		"THIRD_SECRET":        "bar:api key",
 		"LOOKS_LIKE_A_SECRET": "baz:but isn't a secret",
+		"JSON_SECRET":         "json:cloud credentials|jsonpath:{ ." + jsonmock.Key + " }",
 	}
 
 	actual, err := ResolveAll(envVars)
@@ -51,6 +55,7 @@ func TestResolveAll(t *testing.T) {
 		"SECOND_SECRET":       mock.ValueFor("private key"),
 		"THIRD_SECRET":        mock.ValueFor("api key"),
 		"LOOKS_LIKE_A_SECRET": "baz:but isn't a secret",
+		"JSON_SECRET":         "cloud credentials",
 	}
 
 	if diff := cmp.Diff(want, actual); diff != "" {
@@ -68,13 +73,15 @@ func TestResolveAll(t *testing.T) {
 func TestResolveAllWithError(t *testing.T) {
 	fooClient, _ := mock.New()
 	barClient, _ := mock.New()
+	jsonClient, _ := jsonmock.New()
 
 	// Replace whisper's clients with mocks for the duration of the test.
 	originalClientFactories := ProviderFactories
 	defer func() { ProviderFactories = originalClientFactories }()
 	ProviderFactories = map[string]ProviderFactory{
-		"foo": func() (Provider, error) { return fooClient, nil },
-		"bar": func() (Provider, error) { return barClient, nil },
+		"foo":  func() (Provider, error) { return fooClient, nil },
+		"bar":  func() (Provider, error) { return barClient, nil },
+		"json": func() (Provider, error) { return jsonClient, nil },
 	}
 
 	envVars := map[string]string{
@@ -83,6 +90,9 @@ func TestResolveAllWithError(t *testing.T) {
 		"BROKEN_SECRET":       "foo:FAIL",
 		"BUGGY_SECRET":        "bar:FAIL",
 		"LOOKS_LIKE_A_SECRET": "baz:FAIL",
+		"JSON_ERR":            "json:cloud credentials|jsonpath:{ .missing }",
+		"NOT_JSON":            "foo:api key|jsonpath:{ .foo }",
+		"OK_JSON":             "json:private key|jsonpath:{ ." + jsonmock.Key + " }",
 	}
 
 	_, err := ResolveAll(envVars)
@@ -92,14 +102,14 @@ func TestResolveAllWithError(t *testing.T) {
 
 	errMsg := err.Error()
 
-	errorShouldMention := []string{"BROKEN_SECRET", "BUGGY_SECRET"}
+	errorShouldMention := []string{"BROKEN_SECRET", "BUGGY_SECRET", "JSON_ERR", "NOT_JSON"}
 	for _, s := range errorShouldMention {
 		if !strings.Contains(errMsg, s) {
 			t.Errorf("Error message %q should mention %q", errMsg, s)
 		}
 	}
 
-	errorShouldNotMention := []string{"NOT_A_SECRET", "OK_SECRET", "LOOKS_LIKE_A_SECRET"}
+	errorShouldNotMention := []string{"NOT_A_SECRET", "OK_SECRET", "LOOKS_LIKE_A_SECRET", "OK_JSON"}
 	for _, s := range errorShouldNotMention {
 		if strings.Contains(errMsg, s) {
 			t.Errorf("Error message %q should not mention %q", errMsg, s)
