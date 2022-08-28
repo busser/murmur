@@ -3,120 +3,247 @@ package whisper
 import (
 	"context"
 	"fmt"
-	"strings"
+	"sync"
 
 	"github.com/hashicorp/go-multierror"
-
-	"github.com/busser/whisper/internal/whisper/providers/awssm"
-	"github.com/busser/whisper/internal/whisper/providers/azkv"
-	"github.com/busser/whisper/internal/whisper/providers/gcpsm"
-	"github.com/busser/whisper/internal/whisper/providers/passthrough"
 )
 
-// A Provider fetches values from a secret store.
-type Provider interface {
-	// Resolve returns the value of the secret with the given ref. Resolve never
-	// gets called after Close.
-	Resolve(ctx context.Context, ref string) (string, error)
-
-	// Close signals to the provider that it can release any resources it has
-	// allocated, like network connections. Close should return once those
-	// resources are released.
-	Close() error
-}
-
-// A ProviderFactory returns a new Provider.
-type ProviderFactory func() (Provider, error)
-
-// ProviderFactories contains a ProviderFactory for each prefix known to
-// whisper.
-var ProviderFactories = map[string]ProviderFactory{
-	// Passthrough
-	"passthrough": func() (Provider, error) { return passthrough.New() },
-	// Azure Key Vault
-	"azkv": func() (Provider, error) { return azkv.New() },
-	// Google Cloud Secret Manager
-	"gcpsm": func() (Provider, error) { return gcpsm.New() },
-	// AWS Secrets Manager
-	"awssm": func() (Provider, error) { return awssm.New() },
+type variable struct {
+	// Name of the environment variable.
+	name string
+	// The environment variable's original value.
+	rawValue string
+	// The environment variable's query value, if it is a valid whisper query.
+	query *query
+	// The resolved value of the secret referenced in the query.
+	resolvedValue string
+	// The filtered value of the secret.
+	filteredValue string
+	// The final value of the environment variable.
+	finalValue string
+	// Any error that occured while processing the environment variable.
+	err error
 }
 
 // ResolveAll returns a map with the same keys as vars, where all values with
 // known prefixes have been replaced with their values.
 func ResolveAll(vars map[string]string) (map[string]string, error) {
+	var (
+		rawVars  = make(chan variable, len(vars))
+		parsed   = make(chan variable, len(vars))
+		resolved = make(chan variable, len(vars))
+		done     = make(chan variable, len(vars))
+		failed   = make(chan variable, len(vars))
+	)
 
-	// First, group variables based on the prefix of their values. This prefix
-	// will serve to instantiate the necessary clients.
+	// First, feed all the environment variable into the pipeline.
 
-	varsByPrefix := make(map[string][]string)
-	for k, v := range vars {
-		split := strings.SplitN(v, ":", 2)
-
-		// If the variable contains no colons, then it has no prefix and whisper
-		// should ignore it.
-		if len(split) < 2 {
-			continue
+	for name, value := range vars {
+		v := variable{
+			name:     name,
+			rawValue: value,
 		}
+		rawVars <- v
+	}
+	close(rawVars)
 
-		prefix := split[0]
+	// Next, launch the first step of the pipeline: parsing.
 
-		// If the variable has an unknown prefix, then whisper should ignore it.
-		if _, known := ProviderFactories[prefix]; !known {
-			continue
-		}
+	go func() {
+		parseVariables(rawVars, parsed, done)
+		close(parsed)
+	}()
 
-		varsByPrefix[prefix] = append(varsByPrefix[prefix], k)
+	// Then, launch the second step of the pipeline: reference resolution.
+
+	go func() {
+		resolveVariables(parsed, resolved, failed)
+		close(resolved)
+	}()
+
+	// Next, launch the third step of the pipeline: filtering.
+
+	go func() {
+		filterVariables(resolved, done, failed)
+		close(done)
+		close(failed)
+	}()
+
+	// Finally, drain the end of the pipeline and aggregate the results.
+
+	var multierr error
+	for v := range failed {
+		multierr = multierror.Append(multierr, fmt.Errorf("%s: %w", v.name, v.err))
 	}
 
-	var err error
-
-	providerByPrefix := make(map[string]Provider)
-	for prefix := range varsByPrefix {
-		newProvider, known := ProviderFactories[prefix]
-		if !known {
-			err = multierror.Append(err, fmt.Errorf("no provider for prefix %q", prefix))
-			continue
-		}
-
-		provider, providerErr := newProvider()
-		if providerErr != nil {
-			err = multierror.Append(err, fmt.Errorf("provider for %q: %w", prefix, providerErr))
-			continue
-		}
-
-		providerByPrefix[prefix] = provider
-
-		defer provider.Close() // TODO(busser): handle error (log it?)
-	}
-	if err != nil {
-		return nil, err
+	if multierr != nil {
+		return nil, multierr
 	}
 
 	newVars := make(map[string]string)
-	for prefix, keys := range varsByPrefix {
-		p := providerByPrefix[prefix]
-		for _, k := range keys {
-			ref := strings.TrimPrefix(vars[k], prefix+":")
-			val, resolveErr := p.Resolve(context.TODO(), ref)
-			if resolveErr != nil {
-				err = multierror.Append(err, fmt.Errorf("%s: %w", k, resolveErr))
-				continue
-			}
-			newVars[k] = val
-		}
-	}
-	if err != nil {
-		return nil, err
+	for v := range done {
+		newVars[v.name] = v.finalValue
 	}
 
-	mergedVars := make(map[string]string)
-	for k := range vars {
-		if v, ok := newVars[k]; ok {
-			mergedVars[k] = v
+	return newVars, nil
+}
+
+func parseVariables(rawVars <-chan variable, parsed, done chan<- variable) {
+	for v := range rawVars {
+		q, err := parseQuery(v.rawValue)
+		if err != nil {
+			// The variable's value is not a whisper query, so we should leave
+			// it as is.
+			v.finalValue = v.rawValue
+			done <- v
 			continue
 		}
-		mergedVars[k] = vars[k]
+		if _, known := ProviderFactories[q.providerID]; !known {
+			// The variable's value looks like a query but the provider is
+			// unknown. It probably isn't a query.
+			// ?(busser): should we log a message here?
+			v.finalValue = v.rawValue
+			done <- v
+			continue
+		}
+		if _, known := Filters[q.filterID]; q.filterID != "" && !known {
+			// The variable's value looks like a query but the filter is
+			// unknown. It probably isn't a query.
+			// ?(busser): should we log a message here?
+			v.finalValue = v.rawValue
+			done <- v
+			continue
+		}
+
+		v.query = &q
+		parsed <- v
+	}
+}
+
+// resolveVariables drains `in` and, for each variable, attempts to resolve the
+// reference the query contains. Variables with successful resolutions are
+// pushed to `out`. Variables with failed resolutions are pushed to `failed`.
+func resolveVariables(in <-chan variable, out, failed chan<- variable) {
+	chanByProvider := make(map[string]chan variable)
+	var wg sync.WaitGroup
+
+	for v := range in {
+		providerID := v.query.providerID
+
+		// Dispatch variable to separate goroutines based on the provider
+		// required to fetch the secret referenced in the variable's query.
+		if _, ok := chanByProvider[providerID]; !ok {
+			ch := make(chan variable, cap(in))
+			chanByProvider[providerID] = ch
+
+			wg.Add(1)
+			go func() {
+				resolveVariablesWithProvider(providerID, ch, out, failed)
+				wg.Done()
+			}()
+		}
+
+		chanByProvider[providerID] <- v
 	}
 
-	return mergedVars, nil
+	// Wait for each provider to finish resolving its secrets.
+	for _, ch := range chanByProvider {
+		close(ch)
+	}
+	wg.Wait()
+}
+
+// resolveVariablesWithProvider drains `int` and, for each variable, attempts to
+// resolve the reference the query contains with a specific provider. Variables
+// with successful resolutions are pushed to `out`. Variables with failed
+// resolutions are pushed to `failed`.
+func resolveVariablesWithProvider(providerID string, in <-chan variable, out, failed chan<- variable) {
+	provider, err := ProviderFactories[providerID]()
+	if err != nil {
+		// Since we cannot instanciate the provider, we return the same error
+		// for all variables sent our way.
+		for v := range in {
+			v.err = fmt.Errorf("provider instantiation error: %w", err)
+			failed <- v
+		}
+		return
+	}
+	defer provider.Close()
+
+	// TODO(busser): add concurrent fetching and caching.
+
+	for v := range in {
+		secretValue, err := provider.Resolve(context.TODO(), v.query.secretRef)
+		if err != nil {
+			v.err = fmt.Errorf("could not resolve reference: %w", err)
+			failed <- v
+			continue
+		}
+
+		v.resolvedValue = secretValue
+
+		out <- v
+	}
+}
+
+// filterVariables drains `in` and, for each variable, attempts to filter the
+// the secret's value with the filtering rule contained in the query. Variables
+// with successful resolutions are pushed to `out`. Variables with failed
+// resolutions are pushed to `failed`.
+func filterVariables(in <-chan variable, out, failed chan<- variable) {
+	chanByFilter := make(map[string]chan variable)
+	var wg sync.WaitGroup
+
+	for v := range in {
+		filterID := v.query.filterID
+
+		if filterID == "" {
+			v.filteredValue = v.resolvedValue
+			v.finalValue = v.filteredValue
+			out <- v
+			continue
+		}
+
+		// Dispatch variable to separate goroutines based on the filter
+		// specified in the variable's query.
+		if _, ok := chanByFilter[filterID]; !ok {
+			ch := make(chan variable, cap(in))
+			chanByFilter[filterID] = ch
+
+			wg.Add(1)
+			go func() {
+				filterVariablesWithFilter(filterID, ch, out, failed)
+				wg.Done()
+			}()
+		}
+
+		chanByFilter[filterID] <- v
+	}
+
+	// Wait for each filter to finish filtering its secrets.
+	for _, ch := range chanByFilter {
+		close(ch)
+	}
+	wg.Wait()
+}
+
+// filterVariablesWithFilter drains `in` and, for each variable, attempts to
+// filter the the secret's value with a specific filter. Variables with
+// successful resolutions are pushed to `out`. Variables with failed resolutions
+// are pushed to `failed`.
+func filterVariablesWithFilter(filterID string, in <-chan variable, out, failed chan<- variable) {
+	filter := Filters[filterID]
+
+	for v := range in {
+		filteredValue, err := filter(v.resolvedValue, v.query.filterRule)
+		if err != nil {
+			v.err = fmt.Errorf("could not filter value: %w", err)
+			failed <- v
+			continue
+		}
+
+		v.filteredValue = filteredValue
+		v.finalValue = v.filteredValue
+		out <- v
+	}
 }

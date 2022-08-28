@@ -1,7 +1,8 @@
-package mock
+package jsonmock
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -11,7 +12,7 @@ type client struct {
 	closed       bool
 }
 
-// New returns a client useful for testing, which provides deterministic values.
+// New returns a client useful for testing, which provides JSON-encoded values.
 func New() (*client, error) {
 	return new(client), nil
 }
@@ -44,8 +45,19 @@ func (c *client) ResolvedRefs() []string {
 	return c.resolvedRefs
 }
 
+const Key = "ref"
+
 func ValueFor(ref string) string {
-	return fmt.Sprintf("mock value for ref %q", ref)
+	obj := map[string]string{
+		Key: ref,
+	}
+
+	encoded, err := json.Marshal(obj)
+	if err != nil {
+		panic(fmt.Sprintf("could not encode with ref %q", ref))
+	}
+
+	return string(encoded)
 }
 
 func ErrorFor(ref string) error {

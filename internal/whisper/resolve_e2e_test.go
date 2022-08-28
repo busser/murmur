@@ -23,6 +23,7 @@ func TestResolveAllEndToEnd(t *testing.T) {
 		"FROM_AWS":            "awssm:secret-sauce",
 		"FROM_GCP":            "gcpsm:whisper-tests/secret-sauce",
 		"FROM_PASSTHROUGH":    "passthrough:szechuan",
+		"JSON_SECRET":         `passthrough:{"sauce": "szechuan"}|jsonpath:{ .sauce }`,
 		"LOOKS_LIKE_A_SECRET": "baz:but isn't a secret",
 	}
 
@@ -37,6 +38,7 @@ func TestResolveAllEndToEnd(t *testing.T) {
 		"FROM_AWS":            "szechuan",
 		"FROM_GCP":            "szechuan",
 		"FROM_PASSTHROUGH":    "szechuan",
+		"JSON_SECRET":         `szechuan`,
 		"LOOKS_LIKE_A_SECRET": "baz:but isn't a secret",
 	}
 
@@ -51,6 +53,7 @@ func TestResolveAllEndToEndWithError(t *testing.T) {
 		"OK_SECRET":           "awssm:secret-sauce",
 		"BROKEN_SECRET":       "azkv:whisper-alpha.vault.azure.net/does-not-exist",
 		"BUGGY_SECRET":        "gcpsm:invalid-ref",
+		"NOT_JSON":            "passthrough:not-json|jsonpath:{}",
 		"LOOKS_LIKE_A_SECRET": "baz:FAIL",
 	}
 

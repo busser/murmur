@@ -18,6 +18,7 @@ func rootCmd() *cobra.Command {
 		Short: "Whisper injects secrets into your application",
 		Long: `A plug-and-play entrypoint that fetches secrets from a secure
 	location and adds them to your application's environment variables.`,
+		SilenceUsage: true,
 	}
 
 	cmd.AddCommand(execCmd())

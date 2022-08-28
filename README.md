@@ -16,6 +16,8 @@ environment variables.
   - [Hashicorp Vault](#hashicorp-vault)
   - [AWS Secrets Manager](#aws-secrets-manager)
   - [Passthrough](#passthrough)
+- [Filters](#filters)
+  - [JSONPath](#jsonpath)
 - [Troubleshooting](#troubleshooting)
   - [`Error: unknown flag`](#error-unknown-flag)
 
@@ -36,7 +38,11 @@ whisper exec -- /bin/run-my-app
 
 Whisper reads its environment variables, replaces references to secrets with
 the secrets' values, and passes the resulting variables to your application.
-Variables that are not references to secrets are passed as is.
+Variables that are not references to secrets are passed as is. See
+[Secret providers](#secret-providers) below for more details.
+
+Environment variable values can also contain filters that transform the secret's
+value. See [Filters](#filters) below for more details.
 
 ## Using whisper locally
 
@@ -142,6 +148,21 @@ Whisper uses the environment's default credentials to authenticate to AWS.
 The `passthrough:` prefix is special: it does not fetch secrets from anywhere.
 Whisper uses the secret's reference as its value. In effect, this simply removes
 the `passthrough:` prefix from any environment variables.
+
+## Filters
+
+Whisper supports transforming secrets with the following filters.
+
+### JSONPath
+
+Whisper embeds the [Kubernetes JSONPath](https://kubernetes.io/docs/reference/kubectl/jsonpath/)
+library. You can use it to extract specific fields from a JSON-encoded secret.
+For example, if you have a secret with a value of `{"sauce": "szechuan"}`, the
+`jsonpath` filter can extract the `sauce` field's value:
+
+```plaintext
+awssm:secret-sauce|jsonpath:{.sauce}
+```
 
 ## Troubleshooting
 
