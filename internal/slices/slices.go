@@ -28,3 +28,33 @@ func Equal[T comparable](a, b []T) bool {
 	}
 	return true
 }
+
+// Unique filters out repeated elements in a slice. If s is sorted, Unique
+// returns a slice with no duplicate entries.
+func Unique[T comparable](s []T) []T {
+	if len(s) == 0 {
+		return nil
+	}
+
+	previous := s[0]
+	t := []T{previous}
+
+	for i := 1; i < len(s); i++ {
+		if s[i] != previous {
+			t = append(t, s[i])
+		}
+		previous = s[i]
+	}
+
+	return t
+}
+
+func Duplicates[T comparable](s []T) int {
+	uniq := make(map[T]struct{})
+
+	for _, v := range s {
+		uniq[v] = struct{}{}
+	}
+
+	return len(s) - len(uniq)
+}

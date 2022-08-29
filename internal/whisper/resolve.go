@@ -170,18 +170,68 @@ func resolveVariablesWithProvider(providerID string, in <-chan variable, out, fa
 	}
 	defer provider.Close()
 
-	// TODO(busser): add concurrent fetching and caching.
+	// To avoid querying the provider for the same secret twice, we keep a
+	// cache of resolved secrets. Since secrets are resolved concurrently,
+	// duplicate references are put aside until all unique references have been
+	// resolved.
+
+	type result struct {
+		secretValue string
+		err         error
+	}
+
+	var (
+		seen       = make(map[string]bool)
+		duplicates []variable
+
+		wg sync.WaitGroup
+
+		mu    sync.Mutex // protects cache
+		cache = make(map[string]result)
+	)
 
 	for v := range in {
-		secretValue, err := provider.Resolve(context.TODO(), v.query.secretRef)
-		if err != nil {
+		if seen[v.query.secretRef] {
+			duplicates = append(duplicates, v)
+			continue
+		}
+		seen[v.query.secretRef] = true
+
+		wg.Add(1)
+		go func(v variable) {
+			defer wg.Done()
+
+			secretValue, err := provider.Resolve(context.TODO(), v.query.secretRef)
+
+			mu.Lock()
+			cache[v.query.secretRef] = result{secretValue, err}
+			mu.Unlock()
+
+			if err != nil {
+				v.err = fmt.Errorf("could not resolve reference: %w", err)
+				failed <- v
+				return
+			}
+
+			v.resolvedValue = secretValue
+			out <- v
+		}(v)
+	}
+
+	wg.Wait()
+
+	// Now that all unique references have been resolved, results for duplicate
+	// references can be read from cache.
+
+	for _, v := range duplicates {
+		result := cache[v.query.secretRef]
+		if result.err != nil {
 			v.err = fmt.Errorf("could not resolve reference: %w", err)
 			failed <- v
 			continue
 		}
 
-		v.resolvedValue = secretValue
-
+		v.resolvedValue = result.secretValue
 		out <- v
 	}
 }

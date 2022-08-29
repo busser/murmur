@@ -4,122 +4,228 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/busser/whisper/internal/slices"
 	"github.com/busser/whisper/internal/whisper/providers/jsonmock"
 	"github.com/busser/whisper/internal/whisper/providers/mock"
 	"github.com/google/go-cmp/cmp"
 )
 
+type MockProvider interface {
+	Provider
+	ResolvedRefs() []string
+	Closed() bool
+}
+
 func TestResolveAll(t *testing.T) {
-	fooClient, _ := mock.New()
-	barClient, _ := mock.New()
-	jsonClient, _ := jsonmock.New()
-
-	// Replace whisper's clients with mocks for the duration of the test.
-	originalClientFactories := ProviderFactories
-	defer func() { ProviderFactories = originalClientFactories }()
-	ProviderFactories = map[string]ProviderFactory{
-		"foo":  func() (Provider, error) { return fooClient, nil },
-		"bar":  func() (Provider, error) { return barClient, nil },
-		"json": func() (Provider, error) { return jsonClient, nil },
+	tt := []struct {
+		name      string
+		providers map[string]MockProvider
+		variables map[string]string
+		want      map[string]string
+	}{
+		{
+			name: "no overloads",
+			variables: map[string]string{
+				"A": "A",
+				"B": "B",
+				"C": "bar:C",
+			},
+			want: map[string]string{
+				"A": "A",
+				"B": "B",
+				"C": "bar:C",
+			},
+		},
+		{
+			name: "multiple providers",
+			providers: map[string]MockProvider{
+				"foo":  mock.New(),
+				"bar":  mock.New(),
+				"json": jsonmock.New(),
+			},
+			variables: map[string]string{
+				"A": "foo:A",
+				"B": "foo:B",
+				"C": "bar:C",
+				"D": "json:D",
+			},
+			want: map[string]string{
+				"A": mock.ValueFor("A"),
+				"B": mock.ValueFor("B"),
+				"C": mock.ValueFor("C"),
+				"D": jsonmock.ValueFor("D"),
+			},
+		},
+		{
+			name: "filters",
+			providers: map[string]MockProvider{
+				"json": jsonmock.New(),
+			},
+			variables: map[string]string{
+				"A": "json:A|jsonpath:{ ." + jsonmock.Key + " }",
+				"B": "json:B|jsonpath:ref={ ." + jsonmock.Key + " }",
+				"C": "json:C|jsonpath:is my ref { ." + jsonmock.Key + " }?",
+			},
+			want: map[string]string{
+				"A": "A",
+				"B": "ref=B",
+				"C": "is my ref C?",
+			},
+		},
+		{
+			name: "caching",
+			providers: map[string]MockProvider{
+				"json": jsonmock.New(),
+			},
+			variables: map[string]string{
+				"A": "json:A|jsonpath:{ ." + jsonmock.Key + " }",
+				"B": "json:A|jsonpath:ref={ ." + jsonmock.Key + " }",
+				"C": "json:A|jsonpath:is my ref { ." + jsonmock.Key + " }?",
+			},
+			want: map[string]string{
+				"A": "A",
+				"B": "ref=A",
+				"C": "is my ref A?",
+			},
+		},
+		{
+			name: "a bit of everything",
+			providers: map[string]MockProvider{
+				"foo":  mock.New(),
+				"bar":  mock.New(),
+				"json": jsonmock.New(),
+			},
+			variables: map[string]string{
+				"NOT_A_SECRET":        "My app listens on port 3000",
+				"NOT_A_SECRET_EITHER": "The cloud is awesome",
+				"FIRST_SECRET":        "foo:database password",
+				"SECOND_SECRET":       "foo:private key",
+				"THIRD_SECRET":        "bar:api key",
+				"FOURTH_SECRET":       "bar:api key",
+				"LOOKS_LIKE_A_SECRET": "baz:but isn't a secret",
+				"JSON_SECRET":         "json:cloud credentials|jsonpath:{ ." + jsonmock.Key + " }",
+				"SAME_JSON_SECRET":    "json:cloud credentials|jsonpath:ref={ ." + jsonmock.Key + " }",
+			},
+			want: map[string]string{
+				"NOT_A_SECRET":        "My app listens on port 3000",
+				"NOT_A_SECRET_EITHER": "The cloud is awesome",
+				"FIRST_SECRET":        mock.ValueFor("database password"),
+				"SECOND_SECRET":       mock.ValueFor("private key"),
+				"THIRD_SECRET":        mock.ValueFor("api key"),
+				"FOURTH_SECRET":       mock.ValueFor("api key"),
+				"LOOKS_LIKE_A_SECRET": "baz:but isn't a secret",
+				"JSON_SECRET":         "cloud credentials",
+				"SAME_JSON_SECRET":    "ref=cloud credentials",
+			},
+		},
 	}
 
-	envVars := map[string]string{
-		"NOT_A_SECRET":        "My app listens on port 3000",
-		"NOT_A_SECRET_EITHER": "The cloud is awesome",
-		"FIRST_SECRET":        "foo:database password",
-		"SECOND_SECRET":       "foo:private key",
-		"THIRD_SECRET":        "bar:api key",
-		"LOOKS_LIKE_A_SECRET": "baz:but isn't a secret",
-		"JSON_SECRET":         "json:cloud credentials|jsonpath:{ ." + jsonmock.Key + " }",
-	}
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			factories := make(map[string]ProviderFactory)
+			for prefix, provider := range tc.providers {
+				provider := provider
+				factories[prefix] = func() (Provider, error) { return provider, nil }
+			}
 
-	actual, err := ResolveAll(envVars)
-	if err != nil {
-		t.Fatalf("ResolveAll() returned an error: %v", err)
-	}
+			// Replace whisper's clients with mocks for the duration of the test.
+			originalProviderFactories := ProviderFactories
+			defer func() { ProviderFactories = originalProviderFactories }()
+			ProviderFactories = factories
 
-	if len(fooClient.ResolvedRefs()) != 2 {
-		t.Errorf("ResolveAll() called fooClient.Resolve() %d times, expected %d times",
-			len(fooClient.ResolvedRefs()), 2)
-	}
+			actual, err := ResolveAll(tc.variables)
+			if err != nil {
+				t.Fatalf("ResolveAll() returned an error: %v", err)
+			}
 
-	if len(barClient.ResolvedRefs()) != 1 {
-		t.Errorf("ResolveAll() called barClient.Resolve() %d times, expected %d times",
-			len(barClient.ResolvedRefs()), 1)
-	}
+			for prefix, provider := range tc.providers {
+				if !provider.Closed() {
+					t.Errorf("%q provider not closed", prefix)
+				}
+				if slices.Duplicates(provider.ResolvedRefs()) != 0 {
+					t.Errorf("%q provider resolved the same reference more than once, is caching broken?", prefix)
+					t.Logf("%q provider resolved: %q", prefix, provider.ResolvedRefs())
+				}
+			}
 
-	want := map[string]string{
-		"NOT_A_SECRET":        "My app listens on port 3000",
-		"NOT_A_SECRET_EITHER": "The cloud is awesome",
-		"FIRST_SECRET":        mock.ValueFor("database password"),
-		"SECOND_SECRET":       mock.ValueFor("private key"),
-		"THIRD_SECRET":        mock.ValueFor("api key"),
-		"LOOKS_LIKE_A_SECRET": "baz:but isn't a secret",
-		"JSON_SECRET":         "cloud credentials",
-	}
-
-	if diff := cmp.Diff(want, actual); diff != "" {
-		t.Errorf("ResolveAll() mismatch (-want +got):\n%s", diff)
-	}
-
-	if !fooClient.Closed() {
-		t.Errorf("ResolveAll() did not close the \"foo:\" client")
-	}
-	if !barClient.Closed() {
-		t.Errorf("ResolveAll() did not close the \"bar:\" client")
+			if diff := cmp.Diff(tc.want, actual); diff != "" {
+				t.Errorf("ResolveAll() mismatch (-want +got):\n%s", diff)
+			}
+		})
 	}
 }
 
 func TestResolveAllWithError(t *testing.T) {
-	fooClient, _ := mock.New()
-	barClient, _ := mock.New()
-	jsonClient, _ := jsonmock.New()
-
-	// Replace whisper's clients with mocks for the duration of the test.
-	originalClientFactories := ProviderFactories
-	defer func() { ProviderFactories = originalClientFactories }()
-	ProviderFactories = map[string]ProviderFactory{
-		"foo":  func() (Provider, error) { return fooClient, nil },
-		"bar":  func() (Provider, error) { return barClient, nil },
-		"json": func() (Provider, error) { return jsonClient, nil },
+	tt := []struct {
+		name       string
+		providers  map[string]MockProvider
+		variables  map[string]string
+		wantOK     []string
+		wantFailed []string
+	}{
+		{
+			name: "a bit of everything",
+			providers: map[string]MockProvider{
+				"foo":  mock.New(),
+				"bar":  mock.New(),
+				"json": jsonmock.New(),
+			},
+			variables: map[string]string{
+				"NOT_A_SECRET":        "My app listens on port 3000",
+				"OK_SECRET":           "foo:database password",
+				"BROKEN_SECRET":       "foo:FAIL",
+				"BUGGY_SECRET":        "bar:FAIL",
+				"LOOKS_LIKE_A_SECRET": "baz:FAIL",
+				"JSON_ERR":            "json:cloud credentials|jsonpath:{ .missing }",
+				"NOT_JSON":            "foo:api key|jsonpath:{ .foo }",
+				"OK_JSON":             "json:cloud credentials|jsonpath:{ ." + jsonmock.Key + " }",
+			},
+			wantOK:     []string{"NOT_A_SECRET", "OK_SECRET", "LOOKS_LIKE_A_SECRET", "OK_JSON"},
+			wantFailed: []string{"BROKEN_SECRET", "BUGGY_SECRET", "JSON_ERR", "NOT_JSON"},
+		},
 	}
 
-	envVars := map[string]string{
-		"NOT_A_SECRET":        "My app listens on port 3000",
-		"OK_SECRET":           "foo:database password",
-		"BROKEN_SECRET":       "foo:FAIL",
-		"BUGGY_SECRET":        "bar:FAIL",
-		"LOOKS_LIKE_A_SECRET": "baz:FAIL",
-		"JSON_ERR":            "json:cloud credentials|jsonpath:{ .missing }",
-		"NOT_JSON":            "foo:api key|jsonpath:{ .foo }",
-		"OK_JSON":             "json:private key|jsonpath:{ ." + jsonmock.Key + " }",
-	}
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			factories := make(map[string]ProviderFactory)
+			for prefix, provider := range tc.providers {
+				provider := provider
+				factories[prefix] = func() (Provider, error) { return provider, nil }
+			}
 
-	_, err := ResolveAll(envVars)
-	if err == nil {
-		t.Fatal("ResolveAll() returned no error but it should have")
-	}
+			// Replace whisper's clients with mocks for the duration of the test.
+			originalProviderFactories := ProviderFactories
+			defer func() { ProviderFactories = originalProviderFactories }()
+			ProviderFactories = factories
 
-	errMsg := err.Error()
+			_, err := ResolveAll(tc.variables)
+			if err == nil {
+				t.Fatal("ResolveAll() returned no error but it should have")
+			}
 
-	errorShouldMention := []string{"BROKEN_SECRET", "BUGGY_SECRET", "JSON_ERR", "NOT_JSON"}
-	for _, s := range errorShouldMention {
-		if !strings.Contains(errMsg, s) {
-			t.Errorf("Error message %q should mention %q", errMsg, s)
-		}
-	}
+			for prefix, provider := range tc.providers {
+				if !provider.Closed() {
+					t.Errorf("%q provider not closed", prefix)
+				}
+				if slices.Duplicates(provider.ResolvedRefs()) != 0 {
+					t.Errorf("%q provider resolved the same reference more than once, is caching broken?", prefix)
+					t.Logf("%q provider resolved: %q", prefix, provider.ResolvedRefs())
+				}
+			}
 
-	errorShouldNotMention := []string{"NOT_A_SECRET", "OK_SECRET", "LOOKS_LIKE_A_SECRET", "OK_JSON"}
-	for _, s := range errorShouldNotMention {
-		if strings.Contains(errMsg, s) {
-			t.Errorf("Error message %q should not mention %q", errMsg, s)
-		}
-	}
+			errMsg := err.Error()
 
-	if !fooClient.Closed() {
-		t.Errorf("ResolveAll() did not close the \"foo:\" client")
-	}
-	if !barClient.Closed() {
-		t.Errorf("ResolveAll() did not close the \"bar:\" client")
+			for _, s := range tc.wantOK {
+				if strings.Contains(errMsg, s) {
+					t.Errorf("Error message %q should not mention %q", errMsg, s)
+				}
+			}
+
+			for _, s := range tc.wantFailed {
+				if !strings.Contains(errMsg, s) {
+					t.Errorf("Error message %q should mention %q", errMsg, s)
+				}
+			}
+		})
 	}
 }

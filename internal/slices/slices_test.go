@@ -82,3 +82,48 @@ func TestEqual(t *testing.T) {
 		}
 	}
 }
+
+func TestUnique(t *testing.T) {
+	tt := []struct {
+		s    []int
+		want []int
+	}{
+		{nil, nil},
+		{[]int{}, nil},
+		{[]int{1, 2, 3, 4}, []int{1, 2, 3, 4}},
+		{[]int{1, 2, 1, 2}, []int{1, 2, 1, 2}},
+		{[]int{1, 1, 2, 2}, []int{1, 2}},
+		{[]int{1, 1, 2, 1}, []int{1, 2, 1}},
+	}
+
+	for _, tc := range tt {
+		actual := Unique(tc.s)
+		if !Equal(actual, tc.want) {
+			t.Errorf("Unique(%#v) = %#v, want %#v",
+				tc.s, actual, tc.want)
+		}
+	}
+}
+
+func TestDuplicates(t *testing.T) {
+	tt := []struct {
+		s    []int
+		want int
+	}{
+		{nil, 0},
+		{[]int{}, 0},
+		{[]int{1, 2, 3, 4}, 0},
+		{[]int{1, 2, 1, 2}, 2},
+		{[]int{1, 1, 2, 2}, 2},
+		{[]int{1, 1, 2, 1}, 2},
+		{[]int{1, 1, 1, 1}, 3},
+	}
+
+	for _, tc := range tt {
+		actual := Duplicates(tc.s)
+		if actual != tc.want {
+			t.Errorf("Duplicates(%#v) = %#v, want %#v",
+				tc.s, actual, tc.want)
+		}
+	}
+}

@@ -15,7 +15,7 @@ func TestResolveAllEndToEnd(t *testing.T) {
 	// the terraform directory of this repository.
 
 	// This test does a high-level pass using all clients. More in-depth
-	// end-to-end testing of clients is done in the client's package.
+	// end-to-end testing of each provider is done in the provider's package.
 
 	envVars := map[string]string{
 		"NOT_A_SECRET":        "My app listens on port 3000",
