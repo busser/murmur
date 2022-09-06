@@ -12,7 +12,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/spf13/cobra v1.5.0
-	golang.org/x/net v0.0.0-20220722155237-a158d28d115b
+	golang.org/x/net v0.0.0-20220906165146-f3363e06e74c
 	google.golang.org/genproto v0.0.0-20220902135211-223410557253
 	k8s.io/client-go v0.25.0
 )
