@@ -9,7 +9,7 @@ terraform {
   # all 1.0.x versions.
   #
   # For more information: https://www.terraform.io/docs/language/settings/index.html#specifying-a-required-terraform-version
-  required_version = "=1.3.1"
+  required_version = "=1.3.2"
 
   # This layer's state is stored locally and persisted in the git repository.
   backend "local" {}
