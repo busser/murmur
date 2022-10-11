@@ -11,7 +11,7 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/spf13/cobra v1.5.0
+	github.com/spf13/cobra v1.6.0
 	golang.org/x/net v0.0.0-20221004154528-8021a29435af
 	google.golang.org/genproto v0.0.0-20221010155953-15ba04fc1c0e
 	k8s.io/client-go v0.25.2
@@ -30,7 +30,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.1.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.5.1 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/pkg/browser v0.0.0-20210115035449-ce105d075bb4 // indirect
