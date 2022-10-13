@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/spf13/cobra v1.6.0
 	golang.org/x/net v0.0.0-20221012135044-0b7e1fb9d458
-	google.golang.org/genproto v0.0.0-20221010155953-15ba04fc1c0e
+	google.golang.org/genproto v0.0.0-20221013201013-33fc6f83cba4
 	k8s.io/client-go v0.25.2
 )
 
@@ -42,6 +42,6 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/api v0.96.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/grpc v1.49.0 // indirect
+	google.golang.org/grpc v1.50.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
