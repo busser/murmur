@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/spf13/cobra v1.6.0
 	golang.org/x/net v0.0.0-20221014081412-f15817d10f9b
-	google.golang.org/genproto v0.0.0-20221013201013-33fc6f83cba4
+	google.golang.org/genproto v0.0.0-20221014213838-99cd37c6964a
 	k8s.io/client-go v0.25.3
 )
 
