@@ -13,14 +13,14 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/spf13/cobra v1.6.1
 	golang.org/x/net v0.1.0
-	google.golang.org/genproto v0.0.0-20221025140454-527a21cfbd71
+	google.golang.org/genproto v0.0.0-20221027153422-115e99e71e1c
 	k8s.io/client-go v0.25.3
 )
 
 require (
-	cloud.google.com/go v0.104.0 // indirect
+	cloud.google.com/go v0.105.0 // indirect
 	cloud.google.com/go/compute v1.10.0 // indirect
-	cloud.google.com/go/iam v0.5.0 // indirect
+	cloud.google.com/go/iam v0.6.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.0.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/keyvault/internal v0.7.0 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v0.5.1 // indirect
@@ -37,10 +37,10 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20220511200225-c6db032c6c88 // indirect
-	golang.org/x/oauth2 v0.0.0-20221006150949-b44042a4b9c1 // indirect
+	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783 // indirect
 	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
-	google.golang.org/api v0.99.0 // indirect
+	google.golang.org/api v0.100.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/grpc v1.50.1 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
