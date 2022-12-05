@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/spf13/cobra v1.6.1
 	golang.org/x/net v0.2.0
-	google.golang.org/genproto v0.0.0-20221202195650-67e5cbc046fd
+	google.golang.org/genproto v0.0.0-20221205194025-8222ab48f5fc
 	k8s.io/client-go v0.25.4
 )
 
@@ -21,7 +21,7 @@ require (
 	cloud.google.com/go v0.105.0 // indirect
 	cloud.google.com/go/compute v1.13.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.1 // indirect
-	cloud.google.com/go/iam v0.7.0 // indirect
+	cloud.google.com/go/iam v0.8.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.0.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/keyvault/internal v0.7.0 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v0.7.0 // indirect
