@@ -1,6 +1,6 @@
 name: Build and test
 
-on: push
+on: [push, pull_request]
 
 jobs:
   build-and-unit-tests:
@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
-          go-version: '1.18'
+          go-version: "1.19"
       - uses: actions/cache@v3
         with:
           path: |
@@ -26,14 +26,14 @@ jobs:
     # Required for workload identity, which end-to-end tests use to authenticate
     # to Google Cloud and AWS.
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: read
+      id-token: write
 
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
-          go-version: '1.18'
+          go-version: "1.19"
       - uses: actions/cache@v3
         with:
           path: |
@@ -49,10 +49,10 @@ jobs:
       # directory of this repository.
       - uses: google-github-actions/auth@v0
         with:
-          workload_identity_provider: 'projects/841223787188/locations/global/workloadIdentityPools/default/providers/github-oidc'
-          service_account: 'github-actions@whisper-tests.iam.gserviceaccount.com'
-          token_format: 'access_token'
-          access_token_lifetime: '300s'
+          workload_identity_provider: "projects/841223787188/locations/global/workloadIdentityPools/default/providers/github-oidc"
+          service_account: "github-actions@whisper-tests.iam.gserviceaccount.com"
+          token_format: "access_token"
+          access_token_lifetime: "300s"
 
       # This role and the workload identity setup required for Github Actions to
       # use the role are managed by Terraform.
