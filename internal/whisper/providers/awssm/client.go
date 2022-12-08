@@ -6,24 +6,19 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/google/uuid"
 )
 
 type client struct {
-	awsClient *secretsmanager.SecretsManager
+	awsClient *secretsmanager.Client
 }
 
 // New returns a client that fetches secrets from AWS Secrets Manager.
 func New() (*client, error) {
-	session, err := session.NewSession()
-	if err != nil {
-		return nil, err
-	}
-
-	c := secretsmanager.New(session)
+	opts := secretsmanager.Options{}
+	c := secretsmanager.New(opts)
 
 	return &client{
 		awsClient: c,
@@ -46,7 +41,7 @@ func (c *client) Resolve(ctx context.Context, ref string) (string, error) {
 		req.VersionStage = aws.String(versionStage)
 	}
 
-	resp, err := c.awsClient.GetSecretValueWithContext(ctx, req)
+	resp, err := c.awsClient.GetSecretValue(ctx, req)
 	if err != nil {
 		return "", fmt.Errorf("failed to get secret %q version ID: %q version stage: %q): %w", secretID, versionID, versionStage, err)
 	}
