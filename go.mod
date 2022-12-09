@@ -14,7 +14,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	golang.org/x/net v0.4.0
 	google.golang.org/genproto v0.0.0-20221207170731-23e4bf6bdc37
-	k8s.io/client-go v0.25.5
+	k8s.io/client-go v0.26.0
 )
 
 require (
