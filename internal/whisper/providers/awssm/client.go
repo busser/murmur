@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/google/uuid"
 )
@@ -17,8 +18,12 @@ type client struct {
 
 // New returns a client that fetches secrets from AWS Secrets Manager.
 func New() (*client, error) {
-	opts := secretsmanager.Options{}
-	c := secretsmanager.New(opts)
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		return nil, fmt.Errorf("failed to load AWS config: %w", err)
+	}
+
+	c := secretsmanager.NewFromConfig(cfg)
 
 	return &client{
 		awsClient: c,
