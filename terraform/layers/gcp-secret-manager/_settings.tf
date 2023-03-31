@@ -9,7 +9,7 @@ terraform {
   # all 1.0.x versions.
   #
   # For more information: https://www.terraform.io/docs/language/settings/index.html#specifying-a-required-terraform-version
-  required_version = "=1.3.5"
+  required_version = "1.4.4"
 
   # Terraform keeps track of all resources it knows of in its state. This state
   # can be stored remotely in a "backend".
