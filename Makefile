@@ -40,8 +40,8 @@ vet: ## Vet source code.
 test: ## Run unit tests.
 	go test ./...
 
-.PHONY: test-e2e ## Run all tests, including end-to-end tests.
-test-e2e:
+.PHONY: test-e2e
+test-e2e: ## Run all tests, including end-to-end tests.
 	go test -tags=e2e ./...
 
 ##@ Build

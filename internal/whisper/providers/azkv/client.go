@@ -38,7 +38,9 @@ func (c *client) Resolve(ctx context.Context, ref string) (string, error) {
 		return "", fmt.Errorf("invalid reference: %w", err)
 	}
 
-	c.createClientIfMissing(vault)
+	if err := c.createClientIfMissing(vault); err != nil {
+		return "", fmt.Errorf("failed to create client for vault %q: %w", vault, err)
+	}
 
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -58,16 +60,22 @@ func (c *client) Close() error {
 	return nil
 }
 
-func (c *client) createClientIfMissing(vault string) {
+func (c *client) createClientIfMissing(vault string) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	if c.vaultClients[vault] != nil {
-		return
+		return nil
 	}
 
 	vaultURL := fmt.Sprintf("https://%s/", vault)
-	c.vaultClients[vault] = azsecrets.NewClient(vaultURL, c.credential, nil)
+	azClient, err := azsecrets.NewClient(vaultURL, c.credential, nil)
+	if err != nil {
+		return fmt.Errorf("client init: %w", err)
+	}
+
+	c.vaultClients[vault] = azClient
+	return nil
 }
 
 func parseRef(ref string) (vaultURL, name, version string, err error) {
