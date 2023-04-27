@@ -71,3 +71,6 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          # This setting serves to check that the scwsm uses the default region
+          # when the environment sets it.
+          SCW_DEFAULT_REGION: fr-par

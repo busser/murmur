@@ -11,10 +11,11 @@ environment variables.
 - [Using whisper locally](#using-whisper-locally)
 - [Including whisper in a Docker image](#including-whisper-in-a-docker-image)
 - [Secret providers](#secret-providers)
+  - [Scaleway Secret Manager](#scaleway-secret-manager)
   - [Azure Key Vault](#azure-key-vault)
+  - [AWS Secrets Manager](#aws-secrets-manager)
   - [Google Secret Manager](#google-secret-manager)
   - [Hashicorp Vault](#hashicorp-vault)
-  - [AWS Secrets Manager](#aws-secrets-manager)
   - [Passthrough](#passthrough)
 - [Filters](#filters)
   - [JSONPath](#jsonpath)
@@ -74,6 +75,26 @@ See [examples/dockerfile](./examples/dockerfile) for actual code.
 
 Whisper supports fetching secrets from the following providers.
 
+### Scaleway Secret Manager
+
+Whisper will fetch secrets from Scaleway Secret Manager for all environment
+variables that start with `scwsm:`. What follows the prefix should reference a
+secret.
+
+Here are some examples:
+
+- `scwsm:secret-sauce` references the latest value of the secret in the default
+  region named `secret-sauce`.
+- `scwsm:fr-par/secret-sauce` references the latest value of the secret in the
+  `fr-par` region named `secret-sauce`.
+- `scwsm:fr-par/3f34b83f-47a6-4344-bcd4-b63721481cd3` references the latest value
+  of the secret in the `fr-par` region ID'd by
+  `3f34b83f-47a6-4344-bcd4-b63721481cd3`.
+- `scwsm:secret-sauce#123` references version `123` of the secret in the default
+  region named `secret-sauce`.
+- `scwsm:fr-par/secret-sauce#123` references version `123` of the secret in the
+  `fr-par` region named `secret-sauce`.
+
 ### Azure Key Vault
 
 Whisper will fetch secrets from Azure Key Vault for all environment variables
@@ -90,32 +111,6 @@ Here are some examples:
 Whisper uses the environment's default credentials to authenticate to Azure. You
 can set these credentials with the [environment variables listed here](https://github.com/Azure/azure-sdk-for-go/wiki/Set-up-Your-Environment-for-Authentication#configure-defaultazurecredential),
 or with workload identity.
-
-### Google Secret Manager
-
-Whisper will fetch secrets from Google Cloud Platform's Secret Manager for all
-environment variables that start with `gcpsm:`. What follows the prefix should
-reference a secret.
-
-Here are some examples:
-
-- `gcpsm:example/secret-sauce` references the latest value of the
-  `secret-sauce` secret in the `example` project.
-- `gcpsm:example/secret-sauce#123` references a specific version of the
-- `secret-sauce` secret in the `example` project.
-
-Whisper uses the environment's default credentials to authenticate to Google
-Cloud. You can set these with the `gcloud` CLI, with environment variables,
-with Google Cloud's environment service accounts, or with workload identity.
-
-An alternative to whisper, specific to Google Cloud, is [berglas](https://github.com/GoogleCloudPlatform/berglas).
-
-### Hashicorp Vault
-
-Not yet supported.
-
-You mat want to have a look at [bank-vaults](https://github.com/banzaicloud/bank-vaults)
-in the mean time.
 
 ### AWS Secrets Manager
 
@@ -142,6 +137,32 @@ string is a UUID, then whisper assumes it is a version ID. Otherwise, it assumes
 it is a version label.
 
 Whisper uses the environment's default credentials to authenticate to AWS.
+
+### Google Secret Manager
+
+Whisper will fetch secrets from Google Cloud Platform's Secret Manager for all
+environment variables that start with `gcpsm:`. What follows the prefix should
+reference a secret.
+
+Here are some examples:
+
+- `gcpsm:example/secret-sauce` references the latest value of the
+  `secret-sauce` secret in the `example` project.
+- `gcpsm:example/secret-sauce#123` references a specific version of the
+- `secret-sauce` secret in the `example` project.
+
+Whisper uses the environment's default credentials to authenticate to Google
+Cloud. You can set these with the `gcloud` CLI, with environment variables,
+with Google Cloud's environment service accounts, or with workload identity.
+
+An alternative to whisper, specific to Google Cloud, is [berglas](https://github.com/GoogleCloudPlatform/berglas).
+
+### Hashicorp Vault
+
+Not yet supported.
+
+You mat want to have a look at [bank-vaults](https://github.com/banzaicloud/bank-vaults)
+in the mean time.
 
 ### Passthrough
 

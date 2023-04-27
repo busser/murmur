@@ -12,13 +12,17 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-multierror v1.1.1
+	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.16
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/net v0.9.0
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1
 	k8s.io/client-go v0.27.1
 )
 
-require github.com/google/s2a-go v0.1.2 // indirect
+require (
+	github.com/google/s2a-go v0.1.2 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
+)
 
 require (
 	cloud.google.com/go/compute v1.19.1 // indirect
