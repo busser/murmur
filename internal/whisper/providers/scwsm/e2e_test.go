@@ -13,7 +13,7 @@ import (
 func TestClient(t *testing.T) {
 
 	// The secrets this test reads were created with Terraform. The code is in
-	// the terraform/layers/gcp-secret-manager directory of this repository.
+	// the terraform/layers/scw-secret-manager directory of this repository.
 
 	client, err := scwsm.New()
 	if err != nil {
