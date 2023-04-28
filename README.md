@@ -95,6 +95,9 @@ Here are some examples:
 - `scwsm:fr-par/secret-sauce#123` references version `123` of the secret in the
   `fr-par` region named `secret-sauce`.
 
+The string that comes before `#` could be a name or an ID. If the string is a
+UUID, then whisper assumes it is an ID. Otherwise, it assumes it is a name.
+
 ### Azure Key Vault
 
 Whisper will fetch secrets from Azure Key Vault for all environment variables
