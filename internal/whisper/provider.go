@@ -7,6 +7,7 @@ import (
 	"github.com/busser/whisper/internal/whisper/providers/azkv"
 	"github.com/busser/whisper/internal/whisper/providers/gcpsm"
 	"github.com/busser/whisper/internal/whisper/providers/passthrough"
+	"github.com/busser/whisper/internal/whisper/providers/scwsm"
 )
 
 // A Provider fetches values from a secret store.
@@ -35,4 +36,6 @@ var ProviderFactories = map[string]ProviderFactory{
 	"gcpsm": func() (Provider, error) { return gcpsm.New() },
 	// AWS Secrets Manager
 	"awssm": func() (Provider, error) { return awssm.New() },
+	// Scaleway Secret Manager
+	"scwsm": func() (Provider, error) { return scwsm.New() },
 }
