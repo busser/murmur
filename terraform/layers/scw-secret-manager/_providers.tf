@@ -8,3 +8,6 @@ provider "scaleway" {
   region     = "fr-par"
   zone       = "fr-par-1"
 }
+
+# The "github" provider enables us to configure CI/CD on GitHub.
+provider "github" {}

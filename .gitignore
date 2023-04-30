@@ -10,6 +10,9 @@
 # Ignore Google Cloud client configuration.
 .gcloud/
 
+# Ignore Scaleway configuration.
+.scw/
+
 # Compiled binaries
 bin/
 

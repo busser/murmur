@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/google/uuid"
@@ -17,7 +18,11 @@ type client struct {
 
 // New returns a client that fetches secrets from Google Secret Manager.
 func New() (*client, error) {
-	c, err := scw.NewClient(scw.WithEnv())
+	profile := loadDefaultProfile()
+
+	log.Printf("Using Scaleway profile: %#v", profile)
+
+	c, err := scw.NewClient(scw.WithProfile(profile))
 	if err != nil {
 		return nil, fmt.Errorf("failed to setup client: %w", err)
 	}
@@ -37,6 +42,24 @@ func (c *client) Resolve(ctx context.Context, ref string) (string, error) {
 		return c.resolveByID(ctx, region, id, revision)
 	}
 	return c.resolveByName(ctx, region, name, revision)
+}
+
+func loadDefaultProfile() *scw.Profile {
+	return scw.MergeProfiles(loadConfigProfile(), scw.LoadEnvProfile())
+}
+
+func loadConfigProfile() *scw.Profile {
+	config, err := scw.LoadConfig()
+	if err != nil {
+		return &scw.Profile{}
+	}
+
+	profile, err := config.GetActiveProfile()
+	if err != nil {
+		return &scw.Profile{}
+	}
+
+	return profile
 }
 
 func (c *client) resolveByID(ctx context.Context, region scw.Region, id, revision string) (string, error) {
