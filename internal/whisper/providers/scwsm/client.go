@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/google/uuid"
@@ -19,8 +18,6 @@ type client struct {
 // New returns a client that fetches secrets from Google Secret Manager.
 func New() (*client, error) {
 	profile := loadDefaultProfile()
-
-	log.Printf("Using Scaleway profile: %#v", profile)
 
 	c, err := scw.NewClient(scw.WithProfile(profile))
 	if err != nil {
