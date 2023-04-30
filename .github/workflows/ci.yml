@@ -10,14 +10,6 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: "1.19"
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
       - run: make build test
 
   end-to-end-tests:
@@ -34,14 +26,6 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: "1.19"
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
 
       # This service account and the workload identity setup required for
       # Github Actions to use the service account are managed by Terraform.
