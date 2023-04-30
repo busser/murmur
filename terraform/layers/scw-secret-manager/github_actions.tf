@@ -29,7 +29,12 @@ resource "scaleway_iam_policy" "secrets_readers" {
       data.scaleway_account_project.current.id,
     ]
     permission_set_names = [
-      "SecretManagerReadOnly",
+      # Must grant full access because the ReadOnly permission set does not
+      # grant access to secret values.
+      # Discussion started on Slack here:
+      # https://scaleway-community.slack.com/archives/C04KGMME3U1/p1682867139987979
+      "SecretManagerFullAccess",
+      # "SecretManagerReadOnly",
     ]
   }
 }
@@ -42,13 +47,13 @@ data "github_repository" "whisper" {
   name = "whisper"
 }
 
-resource "github_actions_secret" "tenant_id" {
+resource "github_actions_secret" "access_key" {
   repository      = data.github_repository.whisper.name
   secret_name     = "SCW_ACCESS_KEY"
   plaintext_value = scaleway_iam_api_key.github_actions.access_key
 }
 
-resource "github_actions_secret" "client_id" {
+resource "github_actions_secret" "secret_key" {
   repository      = data.github_repository.whisper.name
   secret_name     = "SCW_SECRET_KEY"
   plaintext_value = scaleway_iam_api_key.github_actions.secret_key
