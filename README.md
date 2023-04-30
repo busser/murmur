@@ -99,7 +99,7 @@ The string that comes before `#` could be a name or an ID. If the string is a
 UUID, then whisper assumes it is an ID. Otherwise, it assumes it is a name.
 
 Whisper uses the environment's default credentials to authenticate to Scaleway.
-You can set these credentials with the [environment variables listed here](https://github.com/scaleway/scaleway-cli/blob/master/docs/commands/config.md).
+You can configure whisper the same way you can [configure the `scw` CLI](https://github.com/scaleway/scaleway-cli/blob/master/docs/commands/config.md).
 
 ### Azure Key Vault
 
