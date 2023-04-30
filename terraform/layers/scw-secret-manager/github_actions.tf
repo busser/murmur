@@ -21,9 +21,9 @@ resource "scaleway_iam_group" "secrets_readers" {
 }
 
 resource "scaleway_iam_policy" "secrets_readers" {
-  name           = "secrets-readers"
-  description    = "grants read-only access to all secrets"
-  application_id = scaleway_iam_application.github_actions.id
+  name        = "secrets-readers"
+  description = "grants read-only access to all secrets"
+  group_id    = scaleway_iam_group.secrets_readers.id
   rule {
     project_ids = [
       data.scaleway_account_project.current.id,
