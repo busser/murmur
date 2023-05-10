@@ -21,7 +21,7 @@ type variable struct {
 	filteredValue string
 	// The final value of the environment variable.
 	finalValue string
-	// Any error that occured while processing the environment variable.
+	// Any error that occurred while processing the environment variable.
 	err error
 }
 
