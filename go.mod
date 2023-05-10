@@ -15,7 +15,7 @@ require (
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/net v0.9.0
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1
-	k8s.io/client-go v0.27.1
+	k8s.io/client-go v11.0.0+incompatible
 )
 
 require github.com/google/s2a-go v0.1.2 // indirect
