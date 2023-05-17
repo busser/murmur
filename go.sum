@@ -10,6 +10,8 @@ cloud.google.com/go/iam v1.0.0/go.mod h1:ikbQ4f1r91wTmBmmOtBCOtuEOei6taatNXytzB7
 cloud.google.com/go/longrunning v0.4.1 h1:v+yFJOfKC3yZdY6ZUI933pIYdhyhV8S3NpWrXWmg7jM=
 cloud.google.com/go/secretmanager v1.10.0 h1:pu03bha7ukxF8otyPKTFdDz+rr9sE3YauS5PliDXK60=
 cloud.google.com/go/secretmanager v1.10.0/go.mod h1:MfnrdvKMPNra9aZtQFvBcvRU54hbPD8/HayQdlUgJpU=
+cloud.google.com/go/secretmanager v1.10.1 h1:9QwQ3oMurvmPEmM80spGe2SFGDa+RRgkLIdTm3gMWO8=
+cloud.google.com/go/secretmanager v1.10.1/go.mod h1:pxG0NLpcK6OMy54kfZgQmsKTPxJem708X1es7xv8n60=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.5.0 h1:xGLAFFd9D3iLGxYiUGPdITSzsFmU1K8VtfuUHWAoN7M=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.5.0/go.mod h1:bjGvMhVMb+EEm3VRNQawDMUyMMjo+S5ewNjflkep/0Q=
 github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.2.2 h1:uqM+VoHjVH6zdlkLF2b6O0ZANcHoj3rO0PoQ3jglUJA=
@@ -251,6 +253,8 @@ google.golang.org/grpc v1.36.0/go.mod h1:qjiiYl8FncCW8feJPdyg3v6XW24KsRHe+dy9BAG
 google.golang.org/grpc v1.45.0/go.mod h1:lN7owxKUQEqMfSyQikvvk5tf/6zMPsrK+ONuO11+0rQ=
 google.golang.org/grpc v1.54.0 h1:EhTqbhiYeixwWQtAEZAxmV9MGqcjEU2mFx52xCzNyag=
 google.golang.org/grpc v1.54.0/go.mod h1:PUSEXI6iWghWaB6lXM4knEgpJNu2qUcKfDtNci3EC2g=
+google.golang.org/grpc v1.55.0 h1:3Oj82/tFSCeUrRTg/5E/7d/W5A1tj6Ky1ABAuZuv5ag=
+google.golang.org/grpc v1.55.0/go.mod h1:iYEXKGkEBhg1PjZQvoYEVPTDkHo1/bjTnfwTeGONTY8=
 google.golang.org/protobuf v0.0.0-20200109180630-ec00e32a8dfd/go.mod h1:DFci5gLYBciE7Vtevhsrf46CRTquxDuWsQurQQe4oz8=
 google.golang.org/protobuf v0.0.0-20200221191635-4d8936d0db64/go.mod h1:kwYJMbMJ01Woi6D6+Kah6886xMZcty6N08ah7+eCXa0=
 google.golang.org/protobuf v0.0.0-20200228230310-ab0ca4ff8a60/go.mod h1:cfTl7dwQJ+fmap5saPgwCLgHXTUD7jkjRqWcaiX5VyM=
