@@ -1,0 +1,60 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:base"],
+
+  // Renovate uses plugins called "managers" to handle different languages and
+  // frameworks. The full list of managers and their behaviour is documented
+  // here: https://docs.renovatebot.com/modules/manager/
+  enabledManagers: ["gomod", "terraform-version", "terraform"],
+
+  // Allow Renovate to update this file when new features require it.
+  configMigration: true,
+
+  // Default to a generic prefix, if a more specific prefix is not set in the
+  // packageRules below.
+  commitMessagePrefix: "⬆️ "
+
+  // Assign pull requests automatically.
+  additionalReviewers: ["busser"],
+  
+  // Use packageRules to customize Renovate's behavior. Be specific with the
+  // match* fields in each rule, to avoid impacting unexpected managers or
+  // packages.
+  packageRules: [
+    // Set a prefix that makes reading the changelog easier.
+    {
+      matchManagers: ["gomod"],
+      commitMessagePrefix: "⬆️[Go] ",
+    },
+    {
+      matchManagers: ["terraform-version", "terraform"],
+      commitMessagePrefix: "⬆️[Terraform] ",
+    },
+
+    // Group dependencies into single pull requests to make reviews easier.
+    {
+      matchManagers: ["gomod"],
+      groupName: "Go packages",
+    },
+    {
+      matchManagers: ["terraform"],
+      groupName: "Terraform providers",
+    },
+
+    // Tidy up lock files after updates.
+    {
+      matchManagers: ["gomod"],
+      postUpdateOptions: ["gomodTidy"],
+    },
+
+    // Handle strange exceptions. Please explain why for future readers.
+    {
+      // This package changed their versioning scheme from X.Y.Z to 0.X.Y a few
+      // years ago. This config stops Renovate from suggesting we upgrade from
+      // v0.27 to v11.
+      matchManagers: ["gomod"],
+      matchPackageNames: ["k8s.io/client-go"],
+      allowedVersions: "<1.0",
+    },
+  ],
+}
