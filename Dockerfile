@@ -1,8 +1,8 @@
 FROM scratch
 
-LABEL org.opencontainers.image.source=https://github.com/busser/whisper
+LABEL org.opencontainers.image.source=https://github.com/busser/murmur
 
 # The binary is built beforehand.
-COPY whisper /
+COPY murmur /
 
-ENTRYPOINT ["/whisper"]
+ENTRYPOINT ["/murmur"]

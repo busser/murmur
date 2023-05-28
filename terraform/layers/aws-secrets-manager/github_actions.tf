@@ -26,7 +26,7 @@ resource "aws_iam_role" "github_actions" {
       Condition = {
         StringLike = {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com",
-          "token.actions.githubusercontent.com:sub" = "repo:busser/whisper:*"
+          "token.actions.githubusercontent.com:sub" = "repo:busser/murmur:*"
         }
       }
     }

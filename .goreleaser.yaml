@@ -9,7 +9,7 @@ builds:
       - windows
       - darwin
     main: ./
-    binary: whisper
+    binary: murmur
 archives:
   - replacements:
       darwin: Darwin
@@ -22,21 +22,21 @@ archives:
         format: zip
 dockers:
   - image_templates:
-      - ghcr.io/busser/whisper:{{ .Tag }}
-      - ghcr.io/busser/whisper:v{{ .Major }}.{{ .Minor }}
-      - ghcr.io/busser/whisper:v{{ .Major }}
-      - ghcr.io/busser/whisper:latest
+      - ghcr.io/busser/murmur:{{ .Tag }}
+      - ghcr.io/busser/murmur:v{{ .Major }}.{{ .Minor }}
+      - ghcr.io/busser/murmur:v{{ .Major }}
+      - ghcr.io/busser/murmur:latest
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 snapshot:
-  name_template: '{{ .Tag }}-next'
+  name_template: "{{ .Tag }}-next"
 changelog:
   sort: asc
   filters:
     exclude:
-      - '^chore:'
+      - "^chore:"
       - '^chore\(deps\):'
-      - '^docs:'
+      - "^docs:"
       - '^fix\(deps\):'
-      - '^refactor:'
-      - '^test:'
+      - "^refactor:"
+      - "^test:"

@@ -2,7 +2,7 @@
 VERSION:=$(shell cat VERSION)
 
 # Image URL to use all building/pushing image targets
-IMG ?= ghcr.io/busser/whisper:$(VERSION)
+IMG ?= ghcr.io/busser/murmur:$(VERSION)
 
 # Setting SHELL to bash allows bash commands to be executed by recipes.
 # Options are set to exit when a recipe line exits non-zero or a piped command fails.
@@ -47,8 +47,8 @@ test-e2e: ## Run all tests, including end-to-end tests.
 ##@ Build
 
 .PHONY: build
-build: fmt vet ## Build whisper binary.
-	go build -o bin/whisper
+build: fmt vet ## Build murmur binary.
+	go build -o bin/murmur
 
 ##@ Release
 

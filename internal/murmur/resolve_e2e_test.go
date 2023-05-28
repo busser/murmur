@@ -1,6 +1,6 @@
 //go:build e2e
 
-package whisper
+package murmur
 
 import (
 	"strings"
@@ -19,9 +19,9 @@ func TestResolveAllEndToEnd(t *testing.T) {
 
 	envVars := map[string]string{
 		"NOT_A_SECRET":        "My app listens on port 3000",
-		"FROM_AZURE":          "azkv:whisper-alpha.vault.azure.net/secret-sauce",
+		"FROM_AZURE":          "azkv:murmur-alpha.vault.azure.net/secret-sauce",
 		"FROM_AWS":            "awssm:secret-sauce",
-		"FROM_GCP":            "gcpsm:whisper-tests/secret-sauce",
+		"FROM_GCP":            "gcpsm:murmur-tests/secret-sauce",
 		"FROM_SCALEWAY":       "scwsm:secret-sauce",
 		"FROM_PASSTHROUGH":    "passthrough:szechuan",
 		"JSON_SECRET":         `passthrough:{"sauce": "szechuan"}|jsonpath:{ .sauce }`,
@@ -53,7 +53,7 @@ func TestResolveAllEndToEndWithError(t *testing.T) {
 	envVars := map[string]string{
 		"NOT_A_SECRET":        "My app listens on port 3000",
 		"OK_SECRET":           "awssm:secret-sauce",
-		"BROKEN_SECRET":       "azkv:whisper-alpha.vault.azure.net/does-not-exist",
+		"BROKEN_SECRET":       "azkv:murmur-alpha.vault.azure.net/does-not-exist",
 		"BUGGY_SECRET":        "gcpsm:invalid-ref",
 		"NOT_JSON":            "passthrough:not-json|jsonpath:{}",
 		"LOOKS_LIKE_A_SECRET": "baz:FAIL",

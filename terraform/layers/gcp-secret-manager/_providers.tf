@@ -5,7 +5,7 @@
 # The "google" provider enables us to provision cloud resources on Google Cloud
 # Platform.
 provider "google" {
-  project = "whisper-tests"
+  project = "murmur-tests"
   region  = "europe-west9"
 }
 
@@ -13,7 +13,7 @@ provider "google" {
 # that are still in beta. The use of beta features should generally be kept to a
 # minimum, but Google's betas are overall very stable.
 provider "google-beta" {
-  project = "whisper-tests"
+  project = "murmur-tests"
   region  = "europe-west9"
 }
 

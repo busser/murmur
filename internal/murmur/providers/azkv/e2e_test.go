@@ -1,21 +1,21 @@
 //go:build e2e
 
-package gcpsm_test
+package azkv_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/busser/whisper/internal/whisper/providers/gcpsm"
+	"github.com/busser/murmur/internal/murmur/providers/azkv"
 	"golang.org/x/net/context"
 )
 
 func TestClient(t *testing.T) {
 
 	// The secrets this test reads were created with Terraform. The code is in
-	// the terraform/layers/gcp-secret-manager directory of this repository.
+	// the terraform/layers/azure-keyvault directory of this repository.
 
-	client, err := gcpsm.New()
+	client, err := azkv.New()
 	if err != nil {
 		t.Fatalf("New() returned an error: %v", err)
 	}
@@ -25,26 +25,51 @@ func TestClient(t *testing.T) {
 		wantVal string
 		wantErr bool
 	}{
+		// References to the "alpha" vault.
 		{
-			ref:     "whisper-tests/secret-sauce",
+			ref:     "murmur-alpha.vault.azure.net/secret-sauce",
 			wantVal: "szechuan",
 			wantErr: false,
 		},
 		{
-			ref:     "whisper-tests/secret-sauce#4",
+			ref:     "murmur-alpha.vault.azure.net/secret-sauce#788ffd5cd2224f67b98e12f6fc0cd720",
 			wantVal: "szechuan",
 			wantErr: false,
 		},
 		{
-			ref:     "whisper-tests/secret-sauce#3",
+			ref:     "murmur-alpha.vault.azure.net/secret-sauce#02fc2105c6b34f8385a2ee8531e4900f",
 			wantVal: "ketchup",
 			wantErr: false,
 		},
 		{
-			ref:     "whisper-tests/does-not-exist",
+			ref:     "murmur-alpha.vault.azure.net/does-not-exist",
 			wantVal: "",
 			wantErr: true,
 		},
+
+		// References to the "bravo" vault.
+		{
+			ref:     "murmur-bravo.vault.azure.net/secret-sauce",
+			wantVal: "szechuan",
+			wantErr: false,
+		},
+		{
+			ref:     "murmur-bravo.vault.azure.net/secret-sauce#48b0d307869b4cf9a0141a062ecdc648",
+			wantVal: "szechuan",
+			wantErr: false,
+		},
+		{
+			ref:     "murmur-bravo.vault.azure.net/secret-sauce#e34b3d09f61f4ed1a1812b88834bcb3e",
+			wantVal: "ketchup",
+			wantErr: false,
+		},
+		{
+			ref:     "murmur-bravo.vault.azure.net/does-not-exist",
+			wantVal: "",
+			wantErr: true,
+		},
+
+		// Other references.
 		{
 			ref:     "invalid-ref",
 			wantVal: "",

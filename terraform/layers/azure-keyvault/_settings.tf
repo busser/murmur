@@ -16,7 +16,7 @@ terraform {
   # For more information on state backends: https://www.terraform.io/docs/language/settings/backends/index.html
   # For more information on the "s3" backend: https://www.terraform.io/docs/language/settings/backends/s3.html
   backend "s3" {
-    bucket   = "b4r-whisper-tfstate"
+    bucket   = "busser-murmur-tfstate"
     key      = "azurerm-keyvault"
     region   = "fr-par"
     endpoint = "https://s3.fr-par.scw.cloud"

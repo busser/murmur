@@ -1,20 +1,20 @@
-package gcpsm_test
+package awssm_test
 
 import (
 	"context"
 	"fmt"
 	"log"
 
-	"github.com/busser/whisper/internal/whisper/providers/gcpsm"
+	"github.com/busser/murmur/internal/murmur/providers/awssm"
 )
 
 func Example() {
-	c, err := gcpsm.New()
+	c, err := awssm.New()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ref := "example-project/secret-sauce"
+	ref := "secret-sauce"
 	val, err := c.Resolve(context.Background(), ref)
 	if err != nil {
 		log.Fatal(err)

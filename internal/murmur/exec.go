@@ -1,4 +1,4 @@
-package whisper
+package murmur
 
 import (
 	"errors"
@@ -8,16 +8,16 @@ import (
 	"os/exec"
 	"sort"
 
-	"github.com/busser/whisper/internal/environ"
+	"github.com/busser/murmur/internal/environ"
 )
 
 // Modified during testing to catch command output.
 var (
-	execOut io.Writer = os.Stdout
-	execErr io.Writer = os.Stderr
+	runOut io.Writer = os.Stdout
+	runErr io.Writer = os.Stderr
 )
 
-func Exec(name string, args ...string) (exitCode int, err error) {
+func Run(name string, args ...string) (exitCode int, err error) {
 	originalVars := environ.ToMap(os.Environ())
 
 	newVars, err := ResolveAll(originalVars)
@@ -34,14 +34,14 @@ func Exec(name string, args ...string) (exitCode int, err error) {
 
 	sort.Strings(overloaded)
 	for _, name := range overloaded {
-		log.Printf("[whisper] overloading %s", name)
+		log.Printf("[murmur] overloading %s", name)
 	}
 
 	subCmd := exec.Command(name, args...)
 	subCmd.Env = environ.ToSlice(newVars)
 	subCmd.Stdin = os.Stdin
-	subCmd.Stdout = execOut
-	subCmd.Stderr = execErr
+	subCmd.Stdout = runOut
+	subCmd.Stderr = runErr
 
 	if err := subCmd.Run(); err != nil {
 		exitErr := new(exec.ExitError)

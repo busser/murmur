@@ -1,22 +1,21 @@
 //go:build e2e
 
-package awssm_test
+package scwsm_test
 
 import (
 	"testing"
 	"time"
 
+	"github.com/busser/murmur/internal/murmur/providers/scwsm"
 	"golang.org/x/net/context"
-
-	"github.com/busser/whisper/internal/whisper/providers/awssm"
 )
 
 func TestClient(t *testing.T) {
 
 	// The secrets this test reads were created with Terraform. The code is in
-	// the terraform/layers/aws-secrets-manager directory of this repository.
+	// the terraform/layers/scw-secret-manager directory of this repository.
 
-	client, err := awssm.New()
+	client, err := scwsm.New()
 	if err != nil {
 		t.Fatalf("New() returned an error: %v", err)
 	}
@@ -26,34 +25,63 @@ func TestClient(t *testing.T) {
 		wantVal string
 		wantErr bool
 	}{
-		// References by name.
 		{
 			ref:     "secret-sauce",
 			wantVal: "szechuan",
 			wantErr: false,
 		},
 		{
-			ref:     "secret-sauce#AWSCURRENT",
+			ref:     "secret-sauce#2",
 			wantVal: "szechuan",
 			wantErr: false,
 		},
 		{
-			ref:     "secret-sauce#9AF93B18-59D6-4C19-92AC-3F69A115D404",
-			wantVal: "szechuan",
-			wantErr: false,
-		},
-		{
-			ref:     "secret-sauce#v2",
-			wantVal: "szechuan",
-			wantErr: false,
-		},
-		{
-			ref:     "secret-sauce#97DD35A4-DD9B-4E4B-B371-9F2CA4673A41",
+			ref:     "secret-sauce#1",
 			wantVal: "ketchup",
 			wantErr: false,
 		},
 		{
-			ref:     "secret-sauce#v1",
+			ref:     "fr-par/secret-sauce",
+			wantVal: "szechuan",
+			wantErr: false,
+		},
+		{
+			ref:     "fr-par/secret-sauce#2",
+			wantVal: "szechuan",
+			wantErr: false,
+		},
+		{
+			ref:     "fr-par/secret-sauce#1",
+			wantVal: "ketchup",
+			wantErr: false,
+		},
+		{
+			ref:     "3f34b83f-47a6-4344-bcd4-b63721481cd3",
+			wantVal: "szechuan",
+			wantErr: false,
+		},
+		{
+			ref:     "3f34b83f-47a6-4344-bcd4-b63721481cd3#2",
+			wantVal: "szechuan",
+			wantErr: false,
+		},
+		{
+			ref:     "3f34b83f-47a6-4344-bcd4-b63721481cd3#1",
+			wantVal: "ketchup",
+			wantErr: false,
+		},
+		{
+			ref:     "fr-par/3f34b83f-47a6-4344-bcd4-b63721481cd3",
+			wantVal: "szechuan",
+			wantErr: false,
+		},
+		{
+			ref:     "fr-par/3f34b83f-47a6-4344-bcd4-b63721481cd3#2",
+			wantVal: "szechuan",
+			wantErr: false,
+		},
+		{
+			ref:     "fr-par/3f34b83f-47a6-4344-bcd4-b63721481cd3#1",
 			wantVal: "ketchup",
 			wantErr: false,
 		},
@@ -62,40 +90,13 @@ func TestClient(t *testing.T) {
 			wantVal: "",
 			wantErr: true,
 		},
-
-		// References by ARN.
 		{
-			ref:     "arn:aws:secretsmanager:eu-west-3:531255069405:secret:secret-sauce-sWcbiZ",
-			wantVal: "szechuan",
-			wantErr: false,
+			ref:     "fr-par/does-not-exist",
+			wantVal: "",
+			wantErr: true,
 		},
 		{
-			ref:     "arn:aws:secretsmanager:eu-west-3:531255069405:secret:secret-sauce-sWcbiZ#AWSCURRENT",
-			wantVal: "szechuan",
-			wantErr: false,
-		},
-		{
-			ref:     "arn:aws:secretsmanager:eu-west-3:531255069405:secret:secret-sauce-sWcbiZ#9AF93B18-59D6-4C19-92AC-3F69A115D404",
-			wantVal: "szechuan",
-			wantErr: false,
-		},
-		{
-			ref:     "arn:aws:secretsmanager:eu-west-3:531255069405:secret:secret-sauce-sWcbiZ#v2",
-			wantVal: "szechuan",
-			wantErr: false,
-		},
-		{
-			ref:     "arn:aws:secretsmanager:eu-west-3:531255069405:secret:secret-sauce-sWcbiZ#97DD35A4-DD9B-4E4B-B371-9F2CA4673A41",
-			wantVal: "ketchup",
-			wantErr: false,
-		},
-		{
-			ref:     "arn:aws:secretsmanager:eu-west-3:531255069405:secret:secret-sauce-sWcbiZ#v1",
-			wantVal: "ketchup",
-			wantErr: false,
-		},
-		{
-			ref:     "arn:aws:secretsmanager:eu-west-3:531255069405:secret:does-not-exist",
+			ref:     "fr-par/does-not-exist#123",
 			wantVal: "",
 			wantErr: true,
 		},
