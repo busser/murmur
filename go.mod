@@ -15,11 +15,11 @@ require (
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.17
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/net v0.10.0
-	google.golang.org/genproto v0.0.0-20230526203410-71b5a4ffd15e
 	k8s.io/client-go v0.27.2
 )
 
 require (
+	google.golang.org/genproto v0.0.0-20230526203410-71b5a4ffd15e // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230525234035-dd9d682886f9 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230525234030-28d5490b6b19 // indirect
 )
