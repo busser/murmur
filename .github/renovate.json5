@@ -12,7 +12,7 @@
 
   // Default to a generic prefix, if a more specific prefix is not set in the
   // packageRules below.
-  commitMessagePrefix: "⬆️ "
+  commitMessagePrefix: "⬆️ ",
 
   // Assign pull requests automatically.
   additionalReviewers: ["busser"],
