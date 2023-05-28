@@ -34,5 +34,9 @@ terraform {
       source  = "scaleway/scaleway"
       version = "2.19.0"
     }
+    github = {
+      source  = "integrations/github"
+      version = "5.25.1"
+    }
   }
 }
