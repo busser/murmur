@@ -1,21 +1,21 @@
 //go:build e2e
 
-package scwsm_test
+package gcpsm_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/busser/whisper/internal/whisper/providers/scwsm"
+	"github.com/busser/murmur/internal/murmur/providers/gcpsm"
 	"golang.org/x/net/context"
 )
 
 func TestClient(t *testing.T) {
 
 	// The secrets this test reads were created with Terraform. The code is in
-	// the terraform/layers/scw-secret-manager directory of this repository.
+	// the terraform/layers/gcp-secret-manager directory of this repository.
 
-	client, err := scwsm.New()
+	client, err := gcpsm.New()
 	if err != nil {
 		t.Fatalf("New() returned an error: %v", err)
 	}
@@ -26,77 +26,27 @@ func TestClient(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			ref:     "secret-sauce",
+			ref:     "murmur-tests/secret-sauce",
 			wantVal: "szechuan",
 			wantErr: false,
 		},
 		{
-			ref:     "secret-sauce#2",
+			ref:     "murmur-tests/secret-sauce#2",
 			wantVal: "szechuan",
 			wantErr: false,
 		},
 		{
-			ref:     "secret-sauce#1",
+			ref:     "murmur-tests/secret-sauce#1",
 			wantVal: "ketchup",
 			wantErr: false,
 		},
 		{
-			ref:     "fr-par/secret-sauce",
-			wantVal: "szechuan",
-			wantErr: false,
-		},
-		{
-			ref:     "fr-par/secret-sauce#2",
-			wantVal: "szechuan",
-			wantErr: false,
-		},
-		{
-			ref:     "fr-par/secret-sauce#1",
-			wantVal: "ketchup",
-			wantErr: false,
-		},
-		{
-			ref:     "3f34b83f-47a6-4344-bcd4-b63721481cd3",
-			wantVal: "szechuan",
-			wantErr: false,
-		},
-		{
-			ref:     "3f34b83f-47a6-4344-bcd4-b63721481cd3#2",
-			wantVal: "szechuan",
-			wantErr: false,
-		},
-		{
-			ref:     "3f34b83f-47a6-4344-bcd4-b63721481cd3#1",
-			wantVal: "ketchup",
-			wantErr: false,
-		},
-		{
-			ref:     "fr-par/3f34b83f-47a6-4344-bcd4-b63721481cd3",
-			wantVal: "szechuan",
-			wantErr: false,
-		},
-		{
-			ref:     "fr-par/3f34b83f-47a6-4344-bcd4-b63721481cd3#2",
-			wantVal: "szechuan",
-			wantErr: false,
-		},
-		{
-			ref:     "fr-par/3f34b83f-47a6-4344-bcd4-b63721481cd3#1",
-			wantVal: "ketchup",
-			wantErr: false,
-		},
-		{
-			ref:     "does-not-exist",
+			ref:     "murmur-tests/does-not-exist",
 			wantVal: "",
 			wantErr: true,
 		},
 		{
-			ref:     "fr-par/does-not-exist",
-			wantVal: "",
-			wantErr: true,
-		},
-		{
-			ref:     "fr-par/does-not-exist#123",
+			ref:     "invalid-ref",
 			wantVal: "",
 			wantErr: true,
 		},

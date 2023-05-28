@@ -33,8 +33,8 @@ jobs:
       # directory of this repository.
       - uses: google-github-actions/auth@v1
         with:
-          workload_identity_provider: "projects/841223787188/locations/global/workloadIdentityPools/default/providers/github-oidc"
-          service_account: "github-actions@whisper-tests.iam.gserviceaccount.com"
+          workload_identity_provider: "projects/221642914929/locations/global/workloadIdentityPools/default/providers/github-oidc"
+          service_account: "github-actions@murmur-tests.iam.gserviceaccount.com"
           token_format: "access_token"
           access_token_lifetime: "300s"
 

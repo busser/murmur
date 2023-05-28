@@ -1,14 +1,14 @@
-package whisper
+package murmur
 
 import (
 	"bytes"
 	"os"
 	"testing"
 
-	"github.com/busser/whisper/internal/environ"
+	"github.com/busser/murmur/internal/environ"
 )
 
-func TestExec(t *testing.T) {
+func TestRun(t *testing.T) {
 	tt := []struct {
 		name         string
 		command      []string
@@ -56,13 +56,13 @@ func TestExec(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
 
-			// Capture Exec()'s output for the duration of the test.
+			// Capture Run()'s output for the duration of the test.
 			var output bytes.Buffer
-			execOut = &output
-			execErr = &output
+			runOut = &output
+			runErr = &output
 			defer func() {
-				execOut = os.Stdout
-				execErr = os.Stderr
+				runOut = os.Stdout
+				runErr = os.Stderr
 			}()
 
 			// Clear all environment variables for the duration of the test.
@@ -80,9 +80,9 @@ func TestExec(t *testing.T) {
 				os.Setenv(k, v)
 			}
 
-			exitCode, err := Exec(tc.command[0], tc.command[1:]...)
+			exitCode, err := Run(tc.command[0], tc.command[1:]...)
 			if err != nil {
-				t.Errorf("Exec() returned an error: %v", err)
+				t.Errorf("Run() returned an error: %v", err)
 			}
 
 			if exitCode != tc.wantExitCode {

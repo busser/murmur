@@ -1,12 +1,12 @@
-package whisper
+package murmur
 
 import (
 	"strings"
 	"testing"
 
-	"github.com/busser/whisper/internal/slices"
-	"github.com/busser/whisper/internal/whisper/providers/jsonmock"
-	"github.com/busser/whisper/internal/whisper/providers/mock"
+	"github.com/busser/murmur/internal/murmur/providers/jsonmock"
+	"github.com/busser/murmur/internal/murmur/providers/mock"
+	"github.com/busser/murmur/internal/slices"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -128,7 +128,7 @@ func TestResolveAll(t *testing.T) {
 				factories[prefix] = func() (Provider, error) { return provider, nil }
 			}
 
-			// Replace whisper's clients with mocks for the duration of the test.
+			// Replace murmur's clients with mocks for the duration of the test.
 			originalProviderFactories := ProviderFactories
 			defer func() { ProviderFactories = originalProviderFactories }()
 			ProviderFactories = factories
@@ -193,7 +193,7 @@ func TestResolveAllWithError(t *testing.T) {
 				factories[prefix] = func() (Provider, error) { return provider, nil }
 			}
 
-			// Replace whisper's clients with mocks for the duration of the test.
+			// Replace murmur's clients with mocks for the duration of the test.
 			originalProviderFactories := ProviderFactories
 			defer func() { ProviderFactories = originalProviderFactories }()
 			ProviderFactories = factories

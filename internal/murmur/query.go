@@ -1,4 +1,4 @@
-package whisper
+package murmur
 
 import (
 	"errors"

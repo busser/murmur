@@ -1,4 +1,4 @@
-module github.com/busser/whisper
+module github.com/busser/murmur
 
 go 1.20
 

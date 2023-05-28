@@ -1,4 +1,4 @@
-package whisper
+package murmur
 
 import (
 	"context"
@@ -13,7 +13,7 @@ type variable struct {
 	name string
 	// The environment variable's original value.
 	rawValue string
-	// The environment variable's query value, if it is a valid whisper query.
+	// The environment variable's query value, if it is a valid murmur query.
 	query *query
 	// The resolved value of the secret referenced in the query.
 	resolvedValue string
@@ -92,7 +92,7 @@ func parseVariables(rawVars <-chan variable, parsed, done chan<- variable) {
 	for v := range rawVars {
 		q, err := parseQuery(v.rawValue)
 		if err != nil {
-			// The variable's value is not a whisper query, so we should leave
+			// The variable's value is not a murmur query, so we should leave
 			// it as is.
 			v.finalValue = v.rawValue
 			done <- v

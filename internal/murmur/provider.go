@@ -1,13 +1,13 @@
-package whisper
+package murmur
 
 import (
 	"context"
 
-	"github.com/busser/whisper/internal/whisper/providers/awssm"
-	"github.com/busser/whisper/internal/whisper/providers/azkv"
-	"github.com/busser/whisper/internal/whisper/providers/gcpsm"
-	"github.com/busser/whisper/internal/whisper/providers/passthrough"
-	"github.com/busser/whisper/internal/whisper/providers/scwsm"
+	"github.com/busser/murmur/internal/murmur/providers/awssm"
+	"github.com/busser/murmur/internal/murmur/providers/azkv"
+	"github.com/busser/murmur/internal/murmur/providers/gcpsm"
+	"github.com/busser/murmur/internal/murmur/providers/passthrough"
+	"github.com/busser/murmur/internal/murmur/providers/scwsm"
 )
 
 // A Provider fetches values from a secret store.
@@ -26,7 +26,7 @@ type Provider interface {
 type ProviderFactory func() (Provider, error)
 
 // ProviderFactories contains a ProviderFactory for each prefix known to
-// whisper.
+// murmur.
 var ProviderFactories = map[string]ProviderFactory{
 	// Passthrough
 	"passthrough": func() (Provider, error) { return passthrough.New() },

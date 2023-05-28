@@ -1,20 +1,20 @@
-package scwsm_test
+package azkv_test
 
 import (
 	"context"
 	"fmt"
 	"log"
 
-	"github.com/busser/whisper/internal/whisper/providers/scwsm"
+	"github.com/busser/murmur/internal/murmur/providers/azkv"
 )
 
 func Example() {
-	c, err := scwsm.New()
+	c, err := azkv.New()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ref := "fr-par/secret-sauce"
+	ref := "example.vault.azure.net/secret-sauce"
 	val, err := c.Resolve(context.Background(), ref)
 	if err != nil {
 		log.Fatal(err)

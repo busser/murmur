@@ -1,5 +1,5 @@
 FROM alpine
 
-COPY --from=ghcr.io/busser/whisper:latest /whisper /bin/whisper
+COPY --from=ghcr.io/busser/murmur:latest /murmur /bin/murmur
 
-ENTRYPOINT ["/bin/whisper", "exec", "--", "sh", "-c", "echo The secret sauce is $SECRET_SAUCE."]
+ENTRYPOINT ["/bin/murmur", "run", "--", "sh", "-c", "echo The secret sauce is $SECRET_SAUCE."]

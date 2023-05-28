@@ -11,7 +11,7 @@ resource "google_secret_manager_secret_iam_member" "github_actions_access_secret
   member = "serviceAccount:${google_service_account.github_actions.email}"
 }
 
-# We use workload identity to enable keyless authentication from whisper's
+# We use workload identity to enable keyless authentication from murmur's
 # Github Actions workflows.
 resource "google_iam_workload_identity_pool" "default" {
   provider = google-beta
@@ -38,11 +38,11 @@ resource "google_iam_workload_identity_pool_provider" "github_oidc" {
   }
 }
 
-# Whisper's Github Actions workflows use a dedicated Google service account
+# Murmur's Github Actions workflows use a dedicated Google service account
 # to interact with the Google API and access secret versions.
 resource "google_service_account_iam_member" "github_actions_workload_identity" {
   service_account_id = google_service_account.github_actions.id
 
   role   = "roles/iam.workloadIdentityUser"
-  member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.default.name}/attribute.repository/busser/whisper"
+  member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.default.name}/attribute.repository/busser/murmur"
 }

@@ -3,13 +3,13 @@ data "scaleway_account_project" "current" {
 }
 
 resource "scaleway_iam_application" "github_actions" {
-  name        = "whisper-github-actions"
-  description = "Github Actions (busser/whisper)"
+  name        = "murmur-github-actions"
+  description = "Github Actions (busser/murmur)"
 }
 
 resource "scaleway_iam_api_key" "github_actions" {
   application_id = scaleway_iam_application.github_actions.id
-  description    = "Used by Github Actions (busser/whisper)"
+  description    = "Used by Github Actions (busser/murmur)"
 }
 
 resource "scaleway_iam_group" "secrets_readers" {
@@ -41,20 +41,20 @@ resource "scaleway_iam_policy" "secrets_readers" {
 
 // The necessary credentials are stored in this repository's Github Actions
 // secrets. Pipelines use these secrets to set environment variables used by
-// whisper.
+// murmur.
 
-data "github_repository" "whisper" {
-  name = "whisper"
+data "github_repository" "murmur" {
+  name = "murmur"
 }
 
 resource "github_actions_secret" "access_key" {
-  repository      = data.github_repository.whisper.name
+  repository      = data.github_repository.murmur.name
   secret_name     = "SCW_ACCESS_KEY"
   plaintext_value = scaleway_iam_api_key.github_actions.access_key
 }
 
 resource "github_actions_secret" "secret_key" {
-  repository      = data.github_repository.whisper.name
+  repository      = data.github_repository.murmur.name
   secret_name     = "SCW_SECRET_KEY"
   plaintext_value = scaleway_iam_api_key.github_actions.secret_key
 }
