@@ -46,5 +46,15 @@
       matchManagers: ["gomod"],
       postUpdateOptions: ["gomodTidy"],
     },
+
+    // Handle strange exceptions. Please explain why for future readers.
+    {
+      // This package changed their versioning scheme from X.Y.Z to 0.X.Y a few
+      // years ago. This config stops Renovate from suggesting we upgrade from
+      // v0.27 to v11.
+      matchManagers: ["gomod"],
+      matchPackageNames: ["k8s.io/client-go"],
+      allowedVersions: "<1.0",
+    },
   ],
 }
