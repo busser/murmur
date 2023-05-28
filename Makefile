@@ -56,4 +56,4 @@ build: fmt vet ## Build murmur binary.
 release: test ## Release a new version.
 	git tag -a "$(VERSION)" -m "$(VERSION)"
 	git push origin "$(VERSION)"
-	goreleaser release --rm-dist
+	goreleaser release --clean

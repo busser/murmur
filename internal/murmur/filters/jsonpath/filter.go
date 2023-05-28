@@ -3,7 +3,6 @@ package jsonpath
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"k8s.io/client-go/util/jsonpath"
@@ -22,7 +21,8 @@ func Filter(value, template string) (string, error) {
 
 	var parsedValue any
 	if err := json.Unmarshal([]byte(value), &parsedValue); err != nil {
-		return "", errors.New("value is not valid JSON")
+		// If the value is not valid JSON, we can still use it as a string.
+		parsedValue = value
 	}
 
 	var buf bytes.Buffer

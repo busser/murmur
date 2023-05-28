@@ -4,62 +4,76 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/busser/murmur)](https://goreportcard.com/report/github.com/busser/murmur)
 ![tests-passing](https://github.com/busser/murmur/actions/workflows/ci.yml/badge.svg)
 
-Plug-and-play entrypoint to pass secrets as environment variables to a process.
+Plug-and-play executable to pass secrets as environment variables to a process.
 
-- [How it works](#how-it-works)
-- [Using murmur locally](#using-murmur-locally)
-- [Including murmur in a Docker image](#including-murmur-in-a-docker-image)
-- [Secret providers](#secret-providers)
-  - [Scaleway Secret Manager](#scaleway-secret-manager)
-  - [Azure Key Vault](#azure-key-vault)
-  - [AWS Secrets Manager](#aws-secrets-manager)
-  - [Google Secret Manager](#google-secret-manager)
-  - [Hashicorp Vault](#hashicorp-vault)
-  - [Passthrough](#passthrough)
-- [Filters](#filters)
-  - [JSONPath](#jsonpath)
-- [Troubleshooting](#troubleshooting)
-  - [`Error: unknown flag`](#error-unknown-flag)
+Murmur is a small binary that reads its environment variables, replaces
+references to secrets with the secrets' values, and passes the resulting
+variables to your application. Variables that do not reference secrets are
+passed as-is.
 
-## How it works
+Several tools like Murmur exist, each supporting a different secret provider.
+Murmur aims to support as many providers as possible, so you can use Murmur no
+matter which provider you use.
 
-Murmur must run as your application's entrypoint. This means that instead of
-running this command to start your application:
+|                                                               | Scaleway | AWS | Azure | GCP | Vault | 1Password | Doppler |
+| ------------------------------------------------------------- | -------- | --- | ----- | --- | ----- | --------- | ------- |
+| 🤫 Murmur                                                     | ✅       | ✅  | ✅    | ✅  | ❌    | ❌        | ❌      |
+| [Berglas](https://github.com/GoogleCloudPlatform/berglas)     | ❌       | ❌  | ❌    | ✅  | ❌    | ❌        | ❌      |
+| [Bank Vaults](https://github.com/GoogleCloudPlatform/berglas) | ❌       | ❌  | ❌    | ❌  | ✅    | ❌        | ❌      |
+| [1Password CLI](https://developer.1password.com/docs/cli/)    | ❌       | ❌  | ❌    | ❌  | ❌    | ✅        | ❌      |
+| [Doppler CLI](https://github.com/DopplerHQ/cli)               | ❌       | ❌  | ❌    | ❌  | ❌    | ❌        | ✅      |
+
+_If you know of a similar tool that is not listed here, please open an issue so
+that we can add it to the list._
+
+_If you use a secret provider that is not supported by Murmur, please open an
+issue so that we can track demand for it._
+
+- [Fetching a database password](#fetching-a-database-password)
+- [Adding Murmur to a container image](#adding-murmur-to-a-container-image)
+- [Adding Murmur to a Kubernetes pod](#adding-murmur-to-a-kubernetes-pod)
+- [Parsing JSON secrets](#parsing-json-secrets)
+- [Providers and filters](#providers-and-filters)
+  - [`scwsm` provider: Scaleway Secret Manager](#scwsm-provider-scaleway-secret-manager)
+  - [`awssm` provider: AWS Secrets Manager](#awssm-provider-aws-secrets-manager)
+  - [`azkv` provider: Azure Key Vault](#azkv-provider-azure-key-vault)
+  - [`gcpsm` provider: GCP Secret Manager](#gcpsm-provider-gcp-secret-manager)
+  - [`passthrough` provider: no-op](#passthrough-provider-no-op)
+  - [`jsonpath` filter: JSON parsing and templating](#jsonpath-filter-json-parsing-and-templating)
+- [Changes from v0.4 to v0.5](#changes-from-v04-to-v05)
+
+## Fetching a database password
+
+Murmur runs as a wrapper around any command. For example, if you want to connect
+to a PostgreSQL database, instead of running this command:
 
 ```bash
-/bin/run-my-app
+export PGPASSWORD="Q-gVzyDPmvsX6rRAPVjVjvfvR@KGzPJzCEg2"
+psql -h 10.1.12.34 -U my-user -d my-database
 ```
 
-Run this instead:
+You run this instead:
 
 ```bash
-murmur run -- /bin/run-my-app
+export PGPASSWORD="scwsm:database-password"
+murmur run -- psql -h 10.1.12.34 -U my-user -d my-database
 ```
 
-Murmur reads its environment variables, replaces references to secrets with
-the secrets' values, and passes the resulting variables to your application.
-Variables that are not references to secrets are passed as is. See
-[Secret providers](#secret-providers) below for more details.
+Murmur will fetch the value of the `database-password` secret from Scaleway
+Secret Manager, set the `PGPASSWORD` environment variable to that value, and
+then run `psql`.
 
-Environment variable values can also contain filters that transform the secret's
-value. See [Filters](#filters) below for more details.
+## Adding Murmur to a container image
 
-## Using murmur locally
-
-Download the `murmur` binary for your OS and architecture on the
-[project's releases page](https://github.com/busser/murmur/releases) and put
-the binary in your PATH.
-
-## Including murmur in a Docker image
-
-For convenience, the murmur binary is also released as a Docker image. In your
-application's Dockerfile, simply add the following line:
+Murmur is a static binary, so you can simply copy it into your container image
+and use it as your entrypoint. For convenience, the murmur binary is released as
+a container image you can copy from in your Dockerfile:
 
 ```dockerfile
 COPY --from=ghcr.io/busser/murmur:latest /murmur /bin/murmur
 ```
 
-And then change your image's entrypoint:
+Then you can change your image's entrypoint:
 
 ```dockerfile
 # from this:
@@ -68,149 +82,282 @@ ENTRYPOINT ["/bin/run-my-app"]
 ENTRYPOINT ["/bin/murmur", "run", "--", "/bin/run-my-app"]
 ```
 
-See [examples/dockerfile](./examples/dockerfile) for actual code.
+## Adding Murmur to a Kubernetes pod
 
-## Secret providers
+You can use Murmur in a Kubernetes pod even if your application's container
+image does not include Murmur. To do so, you can use an init container that
+copies Murmur into an emptyDir volume, and then use that volume in your
+application's container.
 
-Murmur supports fetching secrets from the following providers.
+Here is an example:
 
-### Scaleway Secret Manager
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-app
+spec:
+  initContainers:
+    - name: copy-murmur
+      image: ghcr.io/busser/murmur:latest
+      command: ["cp", "/murmur", "/shared/murmur"]
+      volumeMounts:
+        - name: murmur
+          mountPath: /shared
+  containers:
+    - name: my-app
+      image: my-app:latest
+      command: ["/shared/murmur", "run", "--", "/bin/run-my-app"]
+      volumeMounts:
+        - name: murmur
+          mountPath: /shared
+  volumes:
+    - name: shared
+      emptyDir: {}
+```
 
-Murmur will fetch secrets from Scaleway Secret Manager for all environment
-variables that start with `scwsm:`. What follows the prefix should reference a
-secret.
+## Parsing JSON secrets
 
-Here are some examples:
+Storing secrets as JSON is a common pattern. For example, a secret might contain
+a JSON object with multiple fields:
 
-- `scwsm:secret-sauce` references the latest value of the secret in the default
-  region named `secret-sauce`.
-- `scwsm:fr-par/secret-sauce` references the latest value of the secret in the
-  `fr-par` region named `secret-sauce`.
-- `scwsm:fr-par/3f34b83f-47a6-4344-bcd4-b63721481cd3` references the latest value
-  of the secret in the `fr-par` region ID'd by
-  `3f34b83f-47a6-4344-bcd4-b63721481cd3`.
-- `scwsm:secret-sauce#123` references version `123` of the secret in the default
-  region named `secret-sauce`.
-- `scwsm:fr-par/secret-sauce#123` references version `123` of the secret in the
-  `fr-par` region named `secret-sauce`.
+```json
+{
+  "host": "10.1.12.34",
+  "port": 5432,
+  "database": "my-database",
+  "username": "my-user",
+  "password": "Q-gVzyDPmvsX6rRAPVjVjvfvR@KGzPJzCEg2"
+}
+```
 
-The string that comes before `#` could be a name or an ID. If the string is a
-UUID, then murmur assumes it is an ID. Otherwise, it assumes it is a name.
+Murmur can parse that JSON and set environment variables for each field by using
+the `jsonpath` filter:
+
+```bash
+export PGHOST="scwsm:database-credentials|jsonpath:{.host}"
+export PGPORT="scwsm:database-credentials|jsonpath:{.port}"
+export PGDATABASE="scwsm:database-credentials|jsonpath:{.database}"
+export PGUSER="scwsm:database-credentials|jsonpath:{.username}"
+export PGPASSWORD="scwsm:database-credentials|jsonpath:{.password}"
+murmur run -- psql
+```
+
+If you have multiple references to the same secret, Murmur will fetch the secret
+only once to avoid unnecessary API calls.
+
+Alternatively, you can use the `json` filter to set a single environment
+variable with the entire JSON object:
+
+```bash
+# psql supports connection strings, so we can use a single variable
+export PGDATABASE="scwsm:database-credentials|jsonpath:{.username}:{password}@{.host}:{.port}/{.database}"
+murmur run -- psql
+```
+
+Murmur uses the Kubernetes JSONPath syntax for the `jsonpath` filter. See the
+[Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/jsonpath/)
+for a full list of capabilities.
+
+## Providers and filters
+
+Murmur's architecture is built around providers and filters. Providers fetch
+secrets from a secret manager, and filters parse and transform the secrets.
+
+Murmur only edits environment variables which contain valid queries. A valid
+query is structured as follows:
+
+```plaintext
+provider_id:secret_ref|filter_id:filter_rule
+```
+
+Using a filter is optional, so this is also a valid query:
+
+```plaintext
+provider_id:secret_ref
+```
+
+Murmur does not support chaining multiple filters yet.
+
+### `scwsm` provider: Scaleway Secret Manager
+
+To fetch a secret from [Scaleway Secret Manager](https://www.scaleway.com/en/secret-manager/),
+the query must be structured as follows:
+
+```plaintext
+scwsm:[region/]{name|id}[#version]
+```
+
+If `region` is not specified, Murmur will delegate region selection to the
+Scaleway SDK. The SDK determines the region based on the environment, by looking
+at environment variables and configuration files.
+
+One of `name` or `id` must be specified. Murmur guesses whether the string is a
+name or an ID depending on whether it is a valid UUID. UUIDs are treated as IDs,
+and other strings are treated as names.
+
+The `version` must either be a positive integer or the "latest" string. If
+`version` is not specified, Murmur defaults to "latest".
+
+Examples:
+
+```plaintext
+scwsm:my-secret
+scwsm:my-secret#123
+scwsm:my-secret#latest
+
+scwsm:fr-par/my-secret
+scwsm:fr-par/my-secret#123
+scwsm:fr-par/my-secret#latest
+
+scwsm:3f34b83f-47a6-4344-bcd4-b63721481cd3
+scwsm:3f34b83f-47a6-4344-bcd4-b63721481cd3#123
+scwsm:3f34b83f-47a6-4344-bcd4-b63721481cd3#latest
+
+scwsm:fr-par/3f34b83f-47a6-4344-bcd4-b63721481cd3
+scwsm:fr-par/3f34b83f-47a6-4344-bcd4-b63721481cd3#123
+scwsm:fr-par/3f34b83f-47a6-4344-bcd4-b63721481cd3#latest
+```
 
 Murmur uses the environment's default credentials to authenticate to Scaleway.
-You can configure murmur the same way you can [configure the `scw` CLI](https://github.com/scaleway/scaleway-cli/blob/master/docs/commands/config.md).
+You can configure Murmur the same way you can [configure the `scw` CLI](https://github.com/scaleway/scaleway-cli/blob/master/docs/commands/config.md).
 
-### Azure Key Vault
+### `awssm` provider: AWS Secrets Manager
 
-Murmur will fetch secrets from Azure Key Vault for all environment variables
-that start with `azkv:`. What follows the prefix should reference a secret.
+To fetch a secret from [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/),
+the query must be structured as follows:
 
-Here are some examples:
+```plaintext
+awssm:{name|arn}[#{version_id|version_stage}]
+```
 
-- `azkv:example.vault.azure.net/secret-sauce` references the latest value of the
-  `secret-sauce` secret in the `example` Key Vault.
-- `azkv:example.vault.azure.net/secret-sauce#5ddc29704c1c4429a4c53605b7949100`
-  references a specific version of the `secret-sauce` secret in the `example`
-  Key Vault.
+One of `name` or `arn` must be specified. You can use a full or partial ARN.
+However, if your secret's name ends with a hyphen followed by six characters,
+you should not use a partial ARN. See [these AWS docs](https://docs.aws.amazon.com/secretsmanager/latest/userguide/troubleshoot.html#ARN_secretnamehyphen)
+for more information.
+
+You can optionally specify one of `version_id` or `version_stage`. Murmur
+guesses whether the string is an ID or a stage depending on whether it is a
+valid UUID. UUIDs are treated as version IDs, and other strings are treated as
+version stages. If neither `version_id` or `version_stage` are specified, Murmur
+defaults to "AWSCURRENT".
+
+Examples:
+
+```plaintext
+awssm:my-secret
+awssm:my-secret#MY_VERSION_STAGE
+awssm:my-secret#9517cc59-646a-4393-81d7-5e6f2d43cbe7
+
+awssm:arn:aws:secretsmanager:us-east-1:123456789012:secret:my-secret
+awssm:arn:aws:secretsmanager:us-east-1:123456789012:secret:my-secret#MY_VERSION_STAGE
+awssm:arn:aws:secretsmanager:us-east-1:123456789012:secret:my-secret#9517cc59-646a-4393-81d7-5e6f2d43cbe7
+```
+
+Murmur uses the environment's default credentials to authenticate to AWS.
+You can configure Murmur the same way you can [configure the `aws` CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html).
+
+### `azkv` provider: Azure Key Vault
+
+To fetch a secret from [Azure Key Vault](https://azure.microsoft.com/en-us/services/key-vault/),
+the query must be structured as follows:
+
+```plaintext
+azkv:keyvault_hostname/name[#version]
+```
+
+The `keyvault_hostname` must be the fully qualified domain name of the Key
+Vault. For example, if your Key Vault's URL is `https://example.vault.azure.net/`,
+then the `keyvault_hostname` is `example.vault.azure.net`.
+
+The `name` is the name of the secret.
+
+The `version` must be a valid version ID. If `version` is not specified, Murmur
+defaults to the latest version of the secret.
+
+Examples:
+
+```plaintext
+azkv:example.vault.azure.net/my-secret
+azkv:example.vault.azure.net/my-secret#5ddc29704c1c4429a4c53605b7949100
+```
 
 Murmur uses the environment's default credentials to authenticate to Azure. You
 can set these credentials with the [environment variables listed here](https://github.com/Azure/azure-sdk-for-go/wiki/Set-up-Your-Environment-for-Authentication#configure-defaultazurecredential),
 or with workload identity.
 
-### AWS Secrets Manager
+### `gcpsm` provider: GCP Secret Manager
 
-Murmur will fetch secrets from AWS Secrets Manager for all environment
-variables that start with `awssm:`. What follows the prefix should reference a
-secret.
-
-Here are some examples:
-
-- `awssm:secret-sauce` references the current value of the `secret-sauce` secret
-  in the region and account defined by the environment.
-- `awssm:secret-sauce#9517cc59-646a-4393-81d7-5e6f2d43cbe7` references a
-  specific version of the `secret-sauce` secret in the region and account
-  defined by the environment.
-- `awssm:secret-sauce#my-label` references a specific staging label of the
-  `secret-sauce` secret in the region and account defined by the environment.
-- `awssm:arn:aws:secretsmanager:us-east-1:123456789012:secret:secret-sauce-abcdef`
-  references the secret with the specified ARN.
-- `awssm:arn:aws:secretsmanager:us-east-1:123456789012:secret:secret-sauce-abcdef#my-label`
-  references a specific staging label of the secret with the specified ARN.
-
-The string that comes after `#` could be a version ID or a version label. If the
-string is a UUID, then murmur assumes it is a version ID. Otherwise, it assumes
-it is a version label.
-
-Murmur uses the environment's default credentials to authenticate to AWS.
-
-### Google Secret Manager
-
-Murmur will fetch secrets from Google Cloud Platform's Secret Manager for all
-environment variables that start with `gcpsm:`. What follows the prefix should
-reference a secret.
-
-Here are some examples:
-
-- `gcpsm:example/secret-sauce` references the latest value of the
-  `secret-sauce` secret in the `example` project.
-- `gcpsm:example/secret-sauce#123` references a specific version of the
-- `secret-sauce` secret in the `example` project.
-
-Murmur uses the environment's default credentials to authenticate to Google
-Cloud. You can set these with the `gcloud` CLI, with environment variables,
-with Google Cloud's environment service accounts, or with workload identity.
-
-An alternative to murmur, specific to Google Cloud, is [berglas](https://github.com/GoogleCloudPlatform/berglas).
-
-### Hashicorp Vault
-
-Not yet supported.
-
-You mat want to have a look at [bank-vaults](https://github.com/banzaicloud/bank-vaults)
-in the mean time.
-
-### Passthrough
-
-The `passthrough:` prefix is special: it does not fetch secrets from anywhere.
-Murmur uses the secret's reference as its value. In effect, this simply removes
-the `passthrough:` prefix from any environment variables.
-
-## Filters
-
-Murmur supports transforming secrets with the following filters.
-
-### JSONPath
-
-Murmur embeds the [Kubernetes JSONPath](https://kubernetes.io/docs/reference/kubectl/jsonpath/)
-library. You can use it to extract specific fields from a JSON-encoded secret.
-For example, if you have a secret with a value of `{"sauce": "szechuan"}`, the
-`jsonpath` filter can extract the `sauce` field's value:
+To fetch a secret from [GCP Secret Manager](https://cloud.google.com/secret-manager),
+the query must be structured as follows:
 
 ```plaintext
-awssm:secret-sauce|jsonpath:{.sauce}
+gcpsm:project/name[#version]
 ```
 
-## Troubleshooting
+The `project` must be either a project ID or a project number.
 
-### `Error: unknown flag`
+The `name` is the name of the secret.
 
-Your application may use flags, like this:
+The `version` must be a valid version number. If `version` is not specified,
+Murmur defaults to the latest version of the secret.
 
-```bash
-murmur run /bin/run-my-app --port=3000
-```
+### `passthrough` provider: no-op
 
-Murmur then picks up the `--port` flag and returns an error:
+This provider is meant for demo and testing purposes. It does not fetch any
+secrets and simply returns the secret reference as the secret's value.
+
+This provider, like all other providers, is fully tested. It is safe to use in
+production, although why would you?
+
+Examples:
 
 ```plaintext
-Error: unknown flag: --port
+passthrough:my-not-so-secret-value
 ```
 
-Murmur ignores any flags that come after a special `--` argument. So simply run
-this command instead:
+### `jsonpath` filter: JSON parsing and templating
 
-```bash
-murmur run -- /bin/run-my-app --port=3000
+To parse a JSON secret and extract a value from it, or to use a secret value in
+a template, the query must be stuctured as follows:
+
+```plaintext
+provider_id:secret_ref|jsonpath:template
 ```
 
-Any flags after the `--` argument will still be passed to your application.
+The `provider_id` and `secret_ref` can be any valid secret reference.
+
+The `template` is a [JSONPath template](https://kubernetes.io/docs/reference/kubectl/jsonpath/).
+Murmur uses the Kubernetes JSONPath implementation, so you can use any feature
+described in the Kubernetes docs.
+
+If the secret's value is not valid JSON, Murmur will treat it as a string and
+execute the template anyway. This means that you can use JSONPath templates with
+non-JSON secrets.
+
+Examples:
+
+```plaintext
+scwsm:my-secret|jsonpath:{.password}
+scwsm:my-secret|jsonpath:{.username}:{.password}@{.hostname}:{.port}/{.database}
+scwsm:my-secret|jsonpath:the secret is {@}
+```
+
+## Changes from v0.4 to v0.5
+
+Following community feedback, we have made two significant changes in v0.5:
+
+1. We have renamed the project from "Whisper" to "Murmur", to make the project
+   documentation easier to find on search engines.
+2. We have renamed the `exec` command to `run`, to make it clear that we are not
+   executing the command directly, but rather running it as a subprocess.
+
+We have made it so that none of these changes are breaking. You can upgrade to
+v0.5 without changing anything in how you use Whisper/Murmur.
+
+We now publish binaries and container images with both names. The `exec` command
+is still available, but it will log a warning message telling you to use the new
+`run` command instead.
+
+We recommend that you update your scripts to use the new name and command, but
+you have all the time you need to do so.
