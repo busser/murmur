@@ -9,19 +9,21 @@ import (
 
 func runCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "run",
-		Short: "Run a command with secrets injected",
-		Long: `Run any command with updated environment variables. Any variables containing
-a reference to an externally-stored secret will be overwritten with the secret's
-value.
-
-Examples:
-
-  # Azure Key Vault
-  export SECRET_SAUCE="azkv:example.vault.azure.net/secret-sauce"
-  murmur run -- sh -c 'echo The secret sauce is $SECRET_SAUCE.'`,
-
+		Use:  "run -- command [args...]",
 		Args: cobra.MinimumNArgs(1),
+
+		DisableFlagsInUseLine: true,
+
+		Short: "Run a command with secrets injected into its environment variables",
+
+		Example: `  # Fetch a database password from Scaleway Secret Manager:
+  export PGPASSWORD="scwsm:database-password"
+  murmur run -- psql -h 10.1.12.34 -U my-user -d my-database  
+  
+  # Build a connection string from a JSON secret:
+  export PGDATABASE="scwsm:database-credentials|jsonpath:{.username}:{password}@{.host}:{.port}/{.database}" 
+  murmur run -- psql`,
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			exitCode, err := murmur.Run(args[0], args[1:]...)
 			if err != nil {

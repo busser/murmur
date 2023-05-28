@@ -31,6 +31,18 @@ func TestFilter(t *testing.T) {
 			want:     "foobar=baz",
 		},
 		{
+			name:     "integer value",
+			value:    `{"port": 5432}`,
+			template: "port={ .port }",
+			want:     "port=5432",
+		},
+		{
+			name:     "not json",
+			value:    "hello",
+			template: "the value is { @ }",
+			want:     "the value is hello",
+		},
+		{
 			name:     "missing value",
 			value:    `{"foo": "bar"}`,
 			template: "{ .missing }",
@@ -41,12 +53,6 @@ func TestFilter(t *testing.T) {
 			value:    `{"foo": "bar"}`,
 			template: "",
 			want:     "",
-		},
-		{
-			name:     "invalid json",
-			value:    "foo",
-			template: "",
-			wantErr:  true,
 		},
 		{
 			name:     "invalid template",
