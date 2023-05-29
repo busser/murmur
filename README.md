@@ -19,7 +19,7 @@ matter which provider you use.
 | ------------------------------------------------------------- | -------- | --- | ----- | --- | ----- | --------- | ------- |
 | 🤫 Murmur                                                     | ✅       | ✅  | ✅    | ✅  | ❌    | ❌        | ❌      |
 | [Berglas](https://github.com/GoogleCloudPlatform/berglas)     | ❌       | ❌  | ❌    | ✅  | ❌    | ❌        | ❌      |
-| [Bank Vaults](https://github.com/GoogleCloudPlatform/berglas) | ❌       | ❌  | ❌    | ❌  | ✅    | ❌        | ❌      |
+| [Bank Vaults](https://github.com/banzaicloud/bank-vaults)     | ❌       | ❌  | ❌    | ❌  | ✅    | ❌        | ❌      |
 | [1Password CLI](https://developer.1password.com/docs/cli/)    | ❌       | ❌  | ❌    | ❌  | ❌    | ✅        | ❌      |
 | [Doppler CLI](https://github.com/DopplerHQ/cli)               | ❌       | ❌  | ❌    | ❌  | ❌    | ❌        | ✅      |
 
