@@ -15,13 +15,13 @@ Several tools like Murmur exist, each supporting a different secret provider.
 Murmur aims to support as many providers as possible, so you can use Murmur no
 matter which provider you use.
 
-|                                                               | Scaleway | AWS | Azure | GCP | Vault | 1Password | Doppler |
-| ------------------------------------------------------------- | -------- | --- | ----- | --- | ----- | --------- | ------- |
-| 🤫 Murmur                                                     | ✅       | ✅  | ✅    | ✅  | ❌    | ❌        | ❌      |
-| [Berglas](https://github.com/GoogleCloudPlatform/berglas)     | ❌       | ❌  | ❌    | ✅  | ❌    | ❌        | ❌      |
-| [Bank Vaults](https://github.com/banzaicloud/bank-vaults)     | ❌       | ❌  | ❌    | ❌  | ✅    | ❌        | ❌      |
-| [1Password CLI](https://developer.1password.com/docs/cli/)    | ❌       | ❌  | ❌    | ❌  | ❌    | ✅        | ❌      |
-| [Doppler CLI](https://github.com/DopplerHQ/cli)               | ❌       | ❌  | ❌    | ❌  | ❌    | ❌        | ✅      |
+|                                                            | Scaleway | AWS | Azure | GCP | Vault | 1Password | Doppler |
+| ---------------------------------------------------------- | -------- | --- | ----- | --- | ----- | --------- | ------- |
+| 🤫 Murmur                                                  | ✅       | ✅  | ✅    | ✅  | ❌    | ❌        | ❌      |
+| [Berglas](https://github.com/GoogleCloudPlatform/berglas)  | ❌       | ❌  | ❌    | ✅  | ❌    | ❌        | ❌      |
+| [Bank Vaults](https://github.com/banzaicloud/bank-vaults)  | ❌       | ❌  | ❌    | ❌  | ✅    | ❌        | ❌      |
+| [1Password CLI](https://developer.1password.com/docs/cli/) | ❌       | ❌  | ❌    | ❌  | ❌    | ✅        | ❌      |
+| [Doppler CLI](https://github.com/DopplerHQ/cli)            | ❌       | ❌  | ❌    | ❌  | ❌    | ❌        | ✅      |
 
 _If you know of a similar tool that is not listed here, please open an issue so
 that we can add it to the list._
@@ -102,14 +102,14 @@ spec:
       image: ghcr.io/busser/murmur:latest
       command: ["cp", "/murmur", "/shared/murmur"]
       volumeMounts:
-        - name: murmur
+        - name: shared
           mountPath: /shared
   containers:
     - name: my-app
       image: my-app:latest
       command: ["/shared/murmur", "run", "--", "/bin/run-my-app"]
       volumeMounts:
-        - name: murmur
+        - name: shared
           mountPath: /shared
   volumes:
     - name: shared
