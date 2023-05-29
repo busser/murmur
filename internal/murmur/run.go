@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"sort"
 
 	"github.com/busser/murmur/internal/environ"
@@ -43,7 +44,37 @@ func Run(name string, args ...string) (exitCode int, err error) {
 	subCmd.Stdout = runOut
 	subCmd.Stderr = runErr
 
-	if err := subCmd.Run(); err != nil {
+	if err := subCmd.Start(); err != nil {
+		return 1, err
+	}
+
+	// Capture signals for the duration of the sub process and forward them.
+	// This is challenging to test automatically, so it's not.
+	// This feature can be tested manually by running this command:
+	// murmur run -- ./internal/murmur/testdata/signal.sh
+	// and then sending an interrupt signal to the murmur process.
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals)
+
+	stop := make(chan struct{})
+	defer func() {
+		close(stop)
+	}()
+
+	// Forward signals to the sub process.
+	go func() {
+		for {
+			select {
+			case <-stop:
+				return
+			case sig := <-signals:
+				log.Printf("[murmur] signal forwarded: %s", sig)
+				_ = subCmd.Process.Signal(sig)
+			}
+		}
+	}()
+
+	if err := subCmd.Wait(); err != nil {
 		exitErr := new(exec.ExitError)
 		if errors.As(err, &exitErr) {
 			return exitErr.ProcessState.ExitCode(), nil
