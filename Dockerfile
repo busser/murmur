@@ -1,4 +1,4 @@
-FROM scratch
+FROM busybox
 
 ARG BINARY=murmur
 
