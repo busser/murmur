@@ -339,7 +339,7 @@ Examples:
 
 ```plaintext
 scwsm:my-secret|jsonpath:{.password}
-scwsm:my-secret|jsonpath:{.username}:{.password}@{.hostname}:{.port}/{.database}
+scwsm:my-secret|jsonpath:postgres://{.username}:{.password}@{.hostname}:{.port}/{.database}
 scwsm:my-secret|jsonpath:the secret is {@}
 ```
 
