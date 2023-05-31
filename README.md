@@ -151,7 +151,7 @@ variable with the entire JSON object:
 
 ```bash
 # psql supports connection strings, so we can use a single variable
-export PGDATABASE="scwsm:database-credentials|jsonpath:{.username}:{password}@{.host}:{.port}/{.database}"
+export PGDATABASE="scwsm:database-credentials|jsonpath:postgres://{.username}:{password}@{.host}:{.port}/{.database}"
 murmur run -- psql
 ```
 
