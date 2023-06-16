@@ -18,7 +18,7 @@ var (
 	runErr io.Writer = os.Stderr
 )
 
-func Run(name string, args ...string) (exitCode int, err error) {
+func Run(verbose bool, name string, args ...string) (exitCode int, err error) {
 	originalVars := environ.ToMap(os.Environ())
 
 	newVars, err := ResolveAll(originalVars)
@@ -51,7 +51,7 @@ func Run(name string, args ...string) (exitCode int, err error) {
 	// Capture signals for the duration of the sub process and forward them.
 	// This is challenging to test automatically, so it's not.
 	// This feature can be tested manually by running this command:
-	// murmur run -- ./internal/murmur/testdata/signal.sh
+	// murmur run -v -- ./internal/murmur/testdata/signal.sh
 	// and then sending an interrupt signal to the murmur process.
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals)
@@ -68,7 +68,9 @@ func Run(name string, args ...string) (exitCode int, err error) {
 			case <-stop:
 				return
 			case sig := <-signals:
-				log.Printf("[murmur] signal forwarded: %s", sig)
+				if verbose {
+					log.Printf("[murmur] signal forwarded: %s", sig)
+				}
 				_ = subCmd.Process.Signal(sig)
 			}
 		}

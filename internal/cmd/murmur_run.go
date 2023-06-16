@@ -8,11 +8,13 @@ import (
 )
 
 func runCmd() *cobra.Command {
+	var verbose *bool
+
 	cmd := &cobra.Command{
 		Use:  "run -- command [args...]",
 		Args: cobra.MinimumNArgs(1),
 
-		DisableFlagsInUseLine: true,
+		DisableFlagsInUseLine: false,
 
 		Short: "Run a command with secrets injected into its environment variables",
 
@@ -25,7 +27,7 @@ func runCmd() *cobra.Command {
   murmur run -- psql`,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			exitCode, err := murmur.Run(args[0], args[1:]...)
+			exitCode, err := murmur.Run(*verbose, args[0], args[1:]...)
 			if err != nil {
 				return err
 			}
@@ -33,6 +35,7 @@ func runCmd() *cobra.Command {
 			return nil
 		},
 	}
+	verbose = cmd.Flags().BoolP("verbose", "v", false, "enables extra logging")
 
 	return cmd
 }

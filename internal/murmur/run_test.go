@@ -80,7 +80,7 @@ func TestRun(t *testing.T) {
 				os.Setenv(k, v)
 			}
 
-			exitCode, err := Run(tc.command[0], tc.command[1:]...)
+			exitCode, err := Run(true, tc.command[0], tc.command[1:]...)
 			if err != nil {
 				t.Errorf("Run() returned an error: %v", err)
 			}
