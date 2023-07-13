@@ -68,7 +68,6 @@ func Run(name string, args ...string) (exitCode int, err error) {
 			case <-stop:
 				return
 			case sig := <-signals:
-				log.Printf("[murmur] signal forwarded: %s", sig)
 				_ = subCmd.Process.Signal(sig)
 			}
 		}
