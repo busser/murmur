@@ -15,7 +15,7 @@ require (
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.18
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/net v0.12.0
-	k8s.io/client-go v0.27.3
+	k8s.io/client-go v0.27.4
 )
 
 require (
