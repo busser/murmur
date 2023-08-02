@@ -3,10 +3,9 @@
 package awssm_test
 
 import (
+	"context"
 	"testing"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"github.com/busser/murmur/internal/murmur/providers/awssm"
 )

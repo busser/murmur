@@ -3,11 +3,11 @@
 package scwsm_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/busser/murmur/internal/murmur/providers/scwsm"
-	"golang.org/x/net/context"
 )
 
 func TestClient(t *testing.T) {
