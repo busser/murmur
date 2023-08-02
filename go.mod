@@ -14,11 +14,11 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.20
 	github.com/spf13/cobra v1.7.0
-	golang.org/x/net v0.12.0
 	k8s.io/client-go v0.27.4
 )
 
 require (
+	golang.org/x/net v0.12.0 // indirect
 	google.golang.org/genproto v0.0.0-20230530153820-e85fd2cbaebc // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230530153820-e85fd2cbaebc // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230530153820-e85fd2cbaebc // indirect

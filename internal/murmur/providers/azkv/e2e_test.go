@@ -3,11 +3,11 @@
 package azkv_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/busser/murmur/internal/murmur/providers/azkv"
-	"golang.org/x/net/context"
 )
 
 func TestClient(t *testing.T) {
