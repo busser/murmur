@@ -7,8 +7,8 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.7.1
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.3.1
 	github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets v0.12.0
-	github.com/aws/aws-sdk-go-v2 v1.20.1
-	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.21.0
+	github.com/aws/aws-sdk-go-v2 v1.20.2
+	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.21.1
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-multierror v1.1.1
@@ -32,16 +32,16 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.3.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/keyvault/internal v0.7.1 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.1.1 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.18.33
-	github.com/aws/aws-sdk-go-v2/credentials v1.13.32 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.13.8 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.38 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.32 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.39 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.32 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.13.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.15.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.21.2 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.18.34
+	github.com/aws/aws-sdk-go-v2/credentials v1.13.33 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.13.9 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.39 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.33 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.40 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.33 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.13.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.15.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.21.3 // indirect
 	github.com/aws/smithy-go v1.14.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
