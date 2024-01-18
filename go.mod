@@ -7,7 +7,7 @@ toolchain go1.21.5
 require (
 	cloud.google.com/go/secretmanager v1.11.4
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.9.1
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.5.0
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.5.1
 	github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets v0.12.0
 	github.com/aws/aws-sdk-go-v2 v1.24.1
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.26.2
@@ -16,7 +16,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.22
 	github.com/spf13/cobra v1.8.0
-	k8s.io/client-go v0.29.0
+	k8s.io/client-go v0.29.1
 )
 
 require (
