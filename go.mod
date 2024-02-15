@@ -16,7 +16,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.23
 	github.com/spf13/cobra v1.8.0
-	k8s.io/client-go v0.29.1
+	k8s.io/client-go v0.29.2
 )
 
 require (
