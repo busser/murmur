@@ -33,6 +33,8 @@ resource "google_iam_workload_identity_pool_provider" "github_oidc" {
     "attribute.repository" = "assertion.repository"
   }
 
+  attribute_condition = "attribute.repository == 'busser/murmur'"
+
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
   }
