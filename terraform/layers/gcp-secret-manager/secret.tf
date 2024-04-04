@@ -2,7 +2,7 @@ resource "google_secret_manager_secret" "example" {
   secret_id = "secret-sauce"
 
   replication {
-    automatic = true
+    auto {}
   }
 
   depends_on = [
