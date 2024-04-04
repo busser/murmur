@@ -25,6 +25,7 @@ terraform {
     # skip certain validation steps.
     skip_credentials_validation = true
     skip_region_validation      = true
+    skip_requesting_account_id  = true
   }
 
   # This layer requires that certain providers be configured by the caller.
