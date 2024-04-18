@@ -1,8 +1,8 @@
 module github.com/busser/murmur
 
-go 1.21
+go 1.22.0
 
-toolchain go1.21.5
+toolchain go1.22.2
 
 require (
 	cloud.google.com/go/secretmanager v1.12.0
@@ -16,7 +16,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.26
 	github.com/spf13/cobra v1.8.0
-	k8s.io/client-go v0.29.4
+	k8s.io/client-go v0.30.0
 )
 
 require (
