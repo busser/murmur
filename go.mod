@@ -1,8 +1,6 @@
 module github.com/busser/murmur
 
-go 1.22.0
-
-toolchain go1.22.2
+go 1.22.2
 
 require (
 	cloud.google.com/go/secretmanager v1.12.0
