@@ -12,7 +12,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.26
+	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.27
 	github.com/spf13/cobra v1.8.0
 	k8s.io/client-go v0.30.1
 )
