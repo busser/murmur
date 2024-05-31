@@ -116,6 +116,27 @@ spec:
       emptyDir: {}
 ```
 
+## Using Murmur as a Library
+
+While Murmur is normally used as a separate standalone executable,
+it is possible to use Murmur as a library within a Go application.
+
+```go
+import (
+  "fmt"
+  murmur "github.com/busser/murmur/extern"
+)
+
+func main() {
+  from := map[string]string { "example-key": "passthrough:example-value" }
+  if to, err := murmur.ResolveAll(from); err != nil {
+    fmt.Printf("murmur returned error: %v\n", err)
+  } else {
+    fmt.Printf("murmur returned value: %v\n", to["example-key"])
+  }
+}
+```
+
 ## Parsing JSON secrets
 
 Storing secrets as JSON is a common pattern. For example, a secret might contain
