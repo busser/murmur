@@ -25,6 +25,7 @@ terraform {
     # skip certain validation steps.
     skip_credentials_validation = true
     skip_region_validation      = true
+    skip_requesting_account_id  = true
   }
 
   # This layer requires that certain providers be configured by the caller.
@@ -32,15 +33,15 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "4.66.0"
+      version = "5.23.0"
     }
     google-beta = {
       source  = "hashicorp/google-beta"
-      version = "4.66.0"
+      version = "5.23.0"
     }
     github = {
       source  = "integrations/github"
-      version = "5.25.1"
+      version = "6.2.1"
     }
   }
 }

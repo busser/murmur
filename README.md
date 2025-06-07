@@ -146,7 +146,7 @@ murmur run -- psql
 If you have multiple references to the same secret, Murmur will fetch the secret
 only once to avoid unnecessary API calls.
 
-Alternatively, you can use the `json` filter to set a single environment
+Alternatively, you can use the `jsonpath` filter to set a single environment
 variable with the entire JSON object:
 
 ```bash

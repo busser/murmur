@@ -49,7 +49,7 @@ dockers:
     ids: [murmur]
     build_flag_templates:
       - --build-arg=BINARY=murmur
-      - --platform=amd64
+      - --platform=linux/amd64
     image_templates:
       - ghcr.io/busser/murmur:{{ .Tag }}
       - ghcr.io/busser/murmur:v{{ .Major }}.{{ .Minor }}
@@ -61,7 +61,7 @@ dockers:
     ids: [whisper]
     build_flag_templates:
       - --build-arg=BINARY=whisper
-      - --platform=amd64
+      - --platform=linux/amd64
     image_templates:
       - ghcr.io/busser/whisper:{{ .Tag }}
       - ghcr.io/busser/whisper:v{{ .Major }}.{{ .Minor }}
