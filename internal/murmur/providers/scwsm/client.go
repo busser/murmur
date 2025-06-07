@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	scwsecret "github.com/scaleway/scaleway-sdk-go/api/secret/v1alpha1"
+	scwsecret "github.com/scaleway/scaleway-sdk-go/api/secret/v1beta1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
@@ -74,12 +74,12 @@ func (c *client) resolveByID(ctx context.Context, region scw.Region, id, revisio
 }
 
 func (c *client) resolveByName(ctx context.Context, region scw.Region, name, revision string) (string, error) {
-	req := &scwsecret.AccessSecretVersionByNameRequest{
+	req := &scwsecret.AccessSecretVersionByPathRequest{
 		Region:     region,
 		SecretName: name,
 		Revision:   revision,
 	}
-	resp, err := scwsecret.NewAPI(c.scwClient).AccessSecretVersionByName(req)
+	resp, err := scwsecret.NewAPI(c.scwClient).AccessSecretVersionByPath(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to access secret (region: %q, name: %q, revision: %q): %w", region, name, revision, err)
 	}
