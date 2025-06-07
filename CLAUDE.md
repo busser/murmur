@@ -22,10 +22,10 @@ Murmur is a secrets injection tool that fetches secrets from various cloud provi
 ### Core Components
 
 **Command Structure**: 
-- `main.go` → `internal/cmd/` → `internal/murmur/`
+- `main.go` → `pkg/cmd/` → `pkg/murmur/`
 - Primary commands: `run` (preferred) and `exec` (deprecated)
 
-**Provider System** (`internal/murmur/providers/`):
+**Provider System** (`pkg/murmur/providers/`):
 - Each provider implements the `Provider` interface with `Resolve()` and `Close()` methods
 - Supported providers: `awssm` (AWS Secrets Manager), `azkv` (Azure Key Vault), `gcpsm` (GCP Secret Manager), `scwsm` (Scaleway Secret Manager), `passthrough` (testing)
 - Provider registration in `provider.go` via `ProviderFactories` map
@@ -52,4 +52,4 @@ Murmur is a secrets injection tool that fetches secrets from various cloud provi
 - Unit tests alongside source files (`*_test.go`)
 - E2E tests require `-tags=e2e` flag and real cloud credentials
 - Mock providers available for testing (`providers/mock/`, `providers/jsonmock/`)
-- Test data in `internal/murmur/testdata/`
+- Test data in `pkg/murmur/testdata/`

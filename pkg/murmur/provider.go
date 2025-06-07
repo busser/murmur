@@ -3,11 +3,11 @@ package murmur
 import (
 	"context"
 
-	"github.com/busser/murmur/internal/murmur/providers/awssm"
-	"github.com/busser/murmur/internal/murmur/providers/azkv"
-	"github.com/busser/murmur/internal/murmur/providers/gcpsm"
-	"github.com/busser/murmur/internal/murmur/providers/passthrough"
-	"github.com/busser/murmur/internal/murmur/providers/scwsm"
+	"github.com/busser/murmur/pkg/murmur/providers/awssm"
+	"github.com/busser/murmur/pkg/murmur/providers/azkv"
+	"github.com/busser/murmur/pkg/murmur/providers/gcpsm"
+	"github.com/busser/murmur/pkg/murmur/providers/passthrough"
+	"github.com/busser/murmur/pkg/murmur/providers/scwsm"
 )
 
 // A Provider fetches values from a secret store.
