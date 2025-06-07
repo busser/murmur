@@ -1,4 +1,4 @@
-# Cloud Infrastucture <!-- omit in toc -->
+# Cloud Infrastructure <!-- omit in toc -->
 
 This directory contains all Terraform code required to provision the cloud
 resources used to test murmur functionality.
