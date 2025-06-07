@@ -59,5 +59,6 @@ jobs:
           # These secrets are managed by Terraform. The relevant code is in the
           # terraform/layers/scw-secret-manager directory of this repository.
           SCW_DEFAULT_REGION: fr-par
+          SCW_DEFAULT_PROJECT_ID: 5e83ac90-5df2-4c7d-98ba-ef50ff4d148a # Cloudlab
           SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
           SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
