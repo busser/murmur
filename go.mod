@@ -3,18 +3,18 @@ module github.com/busser/murmur
 go 1.22.2
 
 require (
-	cloud.google.com/go/secretmanager v1.13.1
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.11.1
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.6.0
+	cloud.google.com/go/secretmanager v1.14.7
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.10.0
 	github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets v0.12.0
-	github.com/aws/aws-sdk-go-v2 v1.27.0
-	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.29.1
-	github.com/google/go-cmp v0.6.0
+	github.com/aws/aws-sdk-go-v2 v1.36.3
+	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.35.5
+	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.27
-	github.com/spf13/cobra v1.8.0
-	k8s.io/client-go v0.30.1
+	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.33
+	github.com/spf13/cobra v1.9.1
+	k8s.io/client-go v0.33.1
 )
 
 require (
@@ -44,7 +44,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.8.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/keyvault/internal v0.7.1 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.2.2 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.27.16
+	github.com/aws/aws-sdk-go-v2/config v1.29.15
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.16 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.3 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.7 // indirect
