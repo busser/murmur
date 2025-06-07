@@ -16,11 +16,13 @@ terraform {
   # For more information on state backends: https://www.terraform.io/docs/language/settings/backends/index.html
   # For more information on the "s3" backend: https://www.terraform.io/docs/language/settings/backends/s3.html
   backend "s3" {
-    bucket   = "busser-murmur-tfstate"
-    key      = "azurerm-keyvault"
-    region   = "fr-par"
-    endpoint = "https://s3.fr-par.scw.cloud"
-    profile  = "scaleway"
+    bucket = "busser-murmur-tfstate"
+    key    = "azurerm-keyvault"
+    region = "fr-par"
+    endpoints = {
+      s3 = "https://s3.fr-par.scw.cloud"
+    }
+    profile = "scaleway"
     # We are swapping the AWS S3 API for the Scaleway S3 API, so we need to 
     # skip certain validation steps.
     skip_credentials_validation = true
@@ -33,15 +35,15 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "3.58.0"
+      version = "4.32.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "2.39.0"
+      version = "3.4.0"
     }
     github = {
       source  = "integrations/github"
-      version = "6.2.1"
+      version = "6.6.0"
     }
   }
 }

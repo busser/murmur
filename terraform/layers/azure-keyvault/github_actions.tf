@@ -10,13 +10,13 @@ resource "azuread_application" "github_actions" {
 }
 
 resource "azuread_service_principal" "github_actions" {
-  application_id               = azuread_application.github_actions.application_id
+  client_id                    = azuread_application.github_actions.client_id
   app_role_assignment_required = false
   owners                       = [data.azuread_client_config.current.object_id]
 }
 
 resource "azuread_service_principal_password" "github_actions" {
-  service_principal_id = azuread_service_principal.github_actions.object_id
+  service_principal_id = azuread_service_principal.github_actions.id
 }
 
 // The necessary credentials are stored in this repository's Github Actions
@@ -36,7 +36,7 @@ resource "github_actions_secret" "tenant_id" {
 resource "github_actions_secret" "client_id" {
   repository      = data.github_repository.murmur.name
   secret_name     = "AZURE_CLIENT_ID"
-  plaintext_value = azuread_service_principal.github_actions.application_id
+  plaintext_value = azuread_service_principal.github_actions.client_id
 }
 
 resource "github_actions_secret" "client_secret" {
