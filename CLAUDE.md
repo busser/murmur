@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Testing
 - Run specific test: `go test ./path/to/package -run TestName`
-- Run e2e tests for specific provider: `go test -tags=e2e ./internal/murmur/providers/awssm`
+- Run e2e tests for specific provider: `go test -tags=e2e ./pkg/murmur/providers/awssm`
 
 ## Architecture
 

@@ -25,8 +25,26 @@ type variable struct {
 	err error
 }
 
-// ResolveAll returns a map with the same keys as vars, where all values with
-// known prefixes have been replaced with their values.
+// ResolveAll resolves all secret references in the input map and returns the resolved values.
+// 
+// Input map keys are preserved. Values that contain valid murmur queries (format: "provider:ref|filter:rule")
+// are resolved by fetching from the appropriate secret store. Values without valid queries pass through unchanged.
+//
+// The resolution process:
+//   1. Parse each value to identify secret queries
+//   2. Group queries by provider for concurrent resolution  
+//   3. Apply filters (like JSONPath) to transform resolved secrets
+//   4. Return final environment-ready values
+//
+// Example:
+//   input := map[string]string{
+//       "DB_PASSWORD": "awssm:prod/database#AWSCURRENT",
+//       "API_KEY": "gcpsm:my-project/api-key|jsonpath:{.token}",
+//       "DEBUG": "true", // passes through unchanged
+//   }
+//   resolved, err := ResolveAll(input)
+//
+// Returns an error if any secret resolution fails. Partial results are not returned on error.
 func ResolveAll(vars map[string]string) (map[string]string, error) {
 	var (
 		rawVars  = make(chan variable, len(vars))

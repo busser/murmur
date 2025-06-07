@@ -33,6 +33,7 @@ issue so that we can track demand for it._
 - [Adding Murmur to a container image](#adding-murmur-to-a-container-image)
 - [Adding Murmur to a Kubernetes pod](#adding-murmur-to-a-kubernetes-pod)
 - [Parsing JSON secrets](#parsing-json-secrets)
+- [Go library usage](#go-library-usage)
 - [Providers and filters](#providers-and-filters)
   - [`scwsm` provider: Scaleway Secret Manager](#scwsm-provider-scaleway-secret-manager)
   - [`awssm` provider: AWS Secrets Manager](#awssm-provider-aws-secrets-manager)
@@ -40,6 +41,7 @@ issue so that we can track demand for it._
   - [`gcpsm` provider: GCP Secret Manager](#gcpsm-provider-gcp-secret-manager)
   - [`passthrough` provider: no-op](#passthrough-provider-no-op)
   - [`jsonpath` filter: JSON parsing and templating](#jsonpath-filter-json-parsing-and-templating)
+- [Error handling and troubleshooting](#error-handling-and-troubleshooting)
 - [Changes from v0.4 to v0.5](#changes-from-v04-to-v05)
 
 ## Fetching a database password
@@ -158,6 +160,99 @@ murmur run -- psql
 Murmur uses the Kubernetes JSONPath syntax for the `jsonpath` filter. See the
 [Kubernetes documentation](https://kubernetes.io/docs/reference/kubectl/jsonpath/)
 for a full list of capabilities.
+
+## Go library usage
+
+As of v0.7.0, Murmur's internal components are available as a public Go library.
+You can import and use Murmur's provider system and secret resolution pipeline
+directly in your Go applications.
+
+### Basic secret resolution
+
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+
+    "github.com/busser/murmur/pkg/murmur"
+)
+
+func main() {
+    // Define secrets using the same syntax as environment variables
+    secrets := map[string]string{
+        "DB_PASSWORD": "awssm:my-database-secret",
+        "API_KEY":     "gcpsm:my-project/api-credentials|jsonpath:{.key}",
+        "DEBUG_MODE":  "passthrough:true", // Non-secret values pass through
+    }
+
+    // Resolve all secrets
+    resolved, err := murmur.ResolveAll(secrets)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Printf("DB Password: %s\n", resolved["DB_PASSWORD"])
+    fmt.Printf("API Key: %s\n", resolved["API_KEY"])
+    fmt.Printf("Debug Mode: %s\n", resolved["DEBUG_MODE"])
+}
+```
+
+### Using providers directly
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/busser/murmur/pkg/murmur"
+)
+
+func main() {
+    // Get a specific provider
+    providerFactory, exists := murmur.ProviderFactories["awssm"]
+    if !exists {
+        log.Fatal("AWS Secrets Manager provider not available")
+    }
+
+    provider, err := providerFactory()
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer provider.Close()
+
+    // Fetch a secret directly
+    secret, err := provider.Resolve(context.Background(), "my-secret")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Printf("Secret value: %s\n", secret)
+}
+```
+
+### Available providers
+
+All built-in providers are available through `murmur.ProviderFactories`:
+
+- `"awssm"` - AWS Secrets Manager
+- `"azkv"` - Azure Key Vault  
+- `"gcpsm"` - GCP Secret Manager
+- `"scwsm"` - Scaleway Secret Manager
+- `"passthrough"` - Testing/no-op provider
+
+### Use cases
+
+The Go library enables several powerful patterns:
+
+- **Configuration-based secret resolution** instead of environment variables
+- **Custom secret injection workflows** in Go applications
+- **Testing with mock providers** for unit tests
+- **Building custom secret management tools** on top of Murmur's provider system
 
 ## Providers and filters
 
@@ -283,8 +378,8 @@ azkv:example.vault.azure.net/my-secret#5ddc29704c1c4429a4c53605b7949100
 ```
 
 Murmur uses the environment's default credentials to authenticate to Azure. You
-can set these credentials with the [environment variables listed here](https://github.com/Azure/azure-sdk-for-go/wiki/Set-up-Your-Environment-for-Authentication#configure-defaultazurecredential),
-or with workload identity.
+can set these credentials with the [environment variables listed here](https://github.com/Azure/azure-sdk-for-go/wiki/Set-up-Your-Environment-for-Authentication#configure-defaultazurecredential)
+(such as `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_TENANT_ID`), or with workload identity.
 
 ### `gcpsm` provider: GCP Secret Manager
 
@@ -301,6 +396,20 @@ The `name` is the name of the secret.
 
 The `version` must be a valid version number. If `version` is not specified,
 Murmur defaults to the latest version of the secret.
+
+Examples:
+
+```plaintext
+gcpsm:my-project-123/my-secret
+gcpsm:my-project-123/my-secret#1
+gcpsm:my-project-123/my-secret#latest
+
+gcpsm:123456789012/database-credentials
+gcpsm:123456789012/database-credentials#5
+```
+
+Murmur uses the environment's default credentials to authenticate to GCP.
+You can configure Murmur the same way you can [configure the `gcloud` CLI](https://cloud.google.com/docs/authentication/provide-credentials-adc).
 
 ### `passthrough` provider: no-op
 
@@ -342,6 +451,83 @@ scwsm:my-secret|jsonpath:{.password}
 scwsm:my-secret|jsonpath:postgres://{.username}:{.password}@{.hostname}:{.port}/{.database}
 scwsm:my-secret|jsonpath:the secret is {@}
 ```
+
+## Error handling and troubleshooting
+
+### Common errors
+
+**Invalid reference format**
+```
+Error: invalid reference: missing colon
+```
+This means your secret reference doesn't follow the correct format. Ensure you use:
+```
+provider_id:secret_ref[|filter_id:filter_rule]
+```
+
+**Authentication failures**
+```
+Error: failed to load AWS config: NoCredentialProviders
+```
+This indicates missing or invalid cloud provider credentials. Check:
+- AWS: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, or AWS profile configuration
+- Azure: `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_TENANT_ID`  
+- GCP: `GOOGLE_APPLICATION_CREDENTIALS` or `gcloud auth application-default login`
+- Scaleway: `SCW_ACCESS_KEY`, `SCW_SECRET_KEY`
+
+**Secret not found**
+```
+Error: failed to access secret "my-secret": secret not found
+```
+Verify:
+- Secret name/ID is correct
+- Secret exists in the specified region/project
+- You have the necessary permissions to read the secret
+- For versioned secrets, the version exists
+
+**JSONPath filter errors**
+```
+Error: failed to apply filter: invalid JSONPath expression
+```
+Check your JSONPath syntax against the [Kubernetes JSONPath documentation](https://kubernetes.io/docs/reference/kubectl/jsonpath/).
+
+### Debugging tips
+
+**Enable verbose logging** (when using as CLI):
+```bash
+export MURMUR_LOG_LEVEL=debug
+murmur run -- your-command
+```
+
+**Test secret resolution** (when using as library):
+```go
+resolved, err := murmur.ResolveAll(map[string]string{
+    "TEST": "passthrough:hello-world",
+})
+if err != nil {
+    log.Printf("Resolution failed: %v", err)
+}
+```
+
+**Validate individual providers**:
+```go
+provider, err := murmur.ProviderFactories["awssm"]()
+if err != nil {
+    log.Printf("Provider initialization failed: %v", err)
+}
+defer provider.Close()
+
+secret, err := provider.Resolve(context.Background(), "test-secret")
+if err != nil {
+    log.Printf("Secret resolution failed: %v", err)
+}
+```
+
+### Performance considerations
+
+- **Concurrent resolution**: Murmur fetches secrets concurrently per provider, but sequentially within each provider
+- **Caching**: Duplicate secret references are cached within a single resolution call
+- **Resource cleanup**: Always call `Close()` on providers when using the library directly
 
 ## Changes from v0.4 to v0.5
 
