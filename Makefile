@@ -56,4 +56,8 @@ build: fmt vet ## Build murmur binary.
 release: test ## Release a new version.
 	git tag -a "$(VERSION)" -m "$(VERSION)"
 	git push origin "$(VERSION)"
-	goreleaser release --clean
+	GITHUB_TOKEN=$$(gh auth token) goreleaser release --clean --release-notes=docs/release-notes/$(VERSION).md
+
+.PHONY: release-dry-run
+release-dry-run: ## Test the release process without publishing.
+	goreleaser release --snapshot --clean --skip=publish --release-notes=docs/release-notes/$(VERSION).md
