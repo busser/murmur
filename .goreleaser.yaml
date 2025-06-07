@@ -1,3 +1,5 @@
+version: 2
+
 before:
   hooks:
     - go mod tidy
@@ -5,15 +7,23 @@ before:
 builds:
   - id: murmur
     binary: murmur
-    env: [CGO_ENABLED=0]
-    goos: [linux, windows, darwin]
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
     main: ./
   # The project was renamed "murmur" in May 2023. For backwards compatibility,
   # we continue to publish artifacts named "whisper".
   - id: whisper
     binary: whisper
-    env: [CGO_ENABLED=0]
-    goos: [linux, windows, darwin]
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
     main: ./
 
 archives:
@@ -29,6 +39,9 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
+    files:
+      - LICENSE
+      - README.md
   # The project was renamed "murmur" in May 2023. For backwards compatibility,
   # we continue to publish artifacts named "whisper".
   - id: whisper
@@ -43,6 +56,9 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
+    files:
+      - LICENSE
+      - README.md
 
 dockers:
   - id: murmur
@@ -70,15 +86,16 @@ dockers:
 
 checksum:
   name_template: "checksums.txt"
+
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  version_template: "{{ .Tag }}-next"
+
 changelog:
   sort: asc
   filters:
     exclude:
-      - "^chore:"
-      - '^chore\(deps\):'
       - "^docs:"
-      - '^fix\(deps\):'
-      - "^refactor:"
       - "^test:"
+
+release:
+  prerelease: auto

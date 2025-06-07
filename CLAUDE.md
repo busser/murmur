@@ -53,3 +53,42 @@ Murmur is a secrets injection tool that fetches secrets from various cloud provi
 - E2E tests require `-tags=e2e` flag and real cloud credentials
 - Mock providers available for testing (`providers/mock/`, `providers/jsonmock/`)
 - Test data in `pkg/murmur/testdata/`
+
+## Release Process
+
+Murmur uses a structured release process with organized release notes and automated tooling.
+
+### Release Commands
+
+- **Release Dry Run**: `make release-dry-run` - Test the complete release process without publishing
+- **Release**: `make release` - Create and publish a new release (requires `gh` CLI authentication)
+
+### Release Workflow
+
+1. **Prepare Release Notes**: Create `docs/release-notes/vX.Y.Z.md` with comprehensive release notes
+2. **Create Release Branch**: `git checkout -b release/vX.Y.Z`
+3. **Update VERSION**: Change `VERSION` file to target version (e.g., `v0.7.0`)
+4. **Commit and PR**: `git commit -m "release vX.Y.Z"` and open PR
+5. **Merge and Release**: After PR merge, checkout main, pull, and run `make release`
+
+### Release Notes Format
+
+Release notes in `docs/release-notes/` follow this structure:
+- **Emoji-prefixed sections** (🔥, 📋, 📚, 🔧)
+- **Brief descriptions** with **code examples**
+- **Links to documentation** for detailed information
+- **User-focused language** highlighting benefits
+
+### Automated Release Features
+
+- **Multi-platform binaries**: Linux, macOS, Windows (amd64, arm64, 386)
+- **Container images**: Automatic Docker image publishing to GitHub Container Registry
+- **GitHub integration**: Automated release creation with binaries and checksums
+- **Release notes**: Automatically included from `docs/release-notes/$(VERSION).md`
+- **Backward compatibility**: Continues publishing both `murmur` and `whisper` binaries
+
+### Dependencies
+
+- **GoReleaser v2**: Handles cross-compilation and publishing
+- **GitHub CLI (`gh`)**: Provides authentication token for releases
+- **Git tags**: Version tags trigger GoReleaser's release process
