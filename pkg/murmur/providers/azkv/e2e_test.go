@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/busser/murmur/internal/murmur/providers/azkv"
+	"github.com/busser/murmur/pkg/murmur/providers/azkv"
 )
 
 func TestClient(t *testing.T) {

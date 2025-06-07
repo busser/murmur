@@ -1,20 +1,20 @@
-package azkv_test
+package awssm_test
 
 import (
 	"context"
 	"fmt"
 	"log"
 
-	"github.com/busser/murmur/internal/murmur/providers/azkv"
+	"github.com/busser/murmur/pkg/murmur/providers/awssm"
 )
 
 func Example() {
-	c, err := azkv.New()
+	c, err := awssm.New()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ref := "example.vault.azure.net/secret-sauce"
+	ref := "secret-sauce"
 	val, err := c.Resolve(context.Background(), ref)
 	if err != nil {
 		log.Fatal(err)

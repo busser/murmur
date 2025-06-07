@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/busser/murmur/internal/environ"
+	"github.com/busser/murmur/pkg/environ"
 )
 
 func Example() {

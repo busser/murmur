@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/busser/murmur/internal/murmur/providers/jsonmock"
-	"github.com/busser/murmur/internal/murmur/providers/mock"
-	"github.com/busser/murmur/internal/slices"
+	"github.com/busser/murmur/pkg/murmur/providers/jsonmock"
+	"github.com/busser/murmur/pkg/murmur/providers/mock"
+	"github.com/busser/murmur/pkg/slices"
 	"github.com/google/go-cmp/cmp"
 )
 

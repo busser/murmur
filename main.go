@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/busser/murmur/internal/cmd"
+	"github.com/busser/murmur/pkg/cmd"
 )
 
 func main() {

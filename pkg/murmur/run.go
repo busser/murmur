@@ -9,7 +9,7 @@ import (
 	"os/signal"
 	"sort"
 
-	"github.com/busser/murmur/internal/environ"
+	"github.com/busser/murmur/pkg/environ"
 )
 
 // Modified during testing to catch command output.

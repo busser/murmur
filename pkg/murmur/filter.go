@@ -1,6 +1,6 @@
 package murmur
 
-import "github.com/busser/murmur/internal/murmur/filters/jsonpath"
+import "github.com/busser/murmur/pkg/murmur/filters/jsonpath"
 
 // A Filter transforms a value obtained from a secret store into another value
 // based on the given rule.
