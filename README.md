@@ -4,11 +4,11 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/busser/murmur)](https://goreportcard.com/report/github.com/busser/murmur)
 ![tests-passing](https://github.com/busser/murmur/actions/workflows/ci.yml/badge.svg)
 
-Plug-and-play executable to pass secrets as environment variables to a process.
+Plug-and-play executable to pass secrets as environment variables to a process, or export them to a file.
 
 Murmur is a small binary that reads its environment variables, replaces
-references to secrets with the secrets' values, and passes the resulting
-variables to your application. Variables that do not reference secrets are
+references to secrets with the secrets' values, and either passes the resulting
+variables to your application, or writes them to a file. Variables that do not reference secrets are
 passed as-is.
 
 Several tools like Murmur exist, each supporting a different secret provider.
@@ -30,6 +30,7 @@ _If you use a secret provider that is not supported by Murmur, please open an
 issue so that we can track demand for it._
 
 - [Fetching a database password](#fetching-a-database-password)
+- [Exporting secrets to a file](#exporting-secrets-to-a-file)
 - [Adding Murmur to a container image](#adding-murmur-to-a-container-image)
 - [Adding Murmur to a Kubernetes pod](#adding-murmur-to-a-kubernetes-pod)
 - [Parsing JSON secrets](#parsing-json-secrets)
@@ -64,6 +65,57 @@ murmur run -- psql -h 10.1.12.34 -U my-user -d my-database
 Murmur will fetch the value of the `database-password` secret from Scaleway
 Secret Manager, set the `PGPASSWORD` environment variable to that value, and
 then run `psql`.
+
+## Exporting secrets to a file
+
+Instead of passing secrets through environment variables, Murmur can write resolved secrets to a file. This approach can be useful when you want to run Murmur before your application starts, rather than as a wrapper around it.
+
+```bash
+export PGPASSWORD="scwsm:database-password"
+murmur export --file /dev/shm/secrets.env
+```
+
+This will create a file at `/dev/shm/secrets.env` containing:
+
+```
+PGPASSWORD=Q-gVzyDPmvsX6rRAPVjVjvfvR@KGzPJzCEg2
+```
+
+Your application can then read this file to load its configuration. Murmur supports two output formats:
+
+**Dotenv format** (default):
+```bash
+murmur export --format dotenv --file /dev/shm/secrets.env
+```
+
+**Java properties format**:
+```bash
+murmur export --format properties --file /dev/shm/secrets.properties
+```
+
+### File permissions and security
+
+By default, Murmur creates files with restrictive permissions (0600) so only the file owner can read them. You can customize this:
+
+```bash
+# Custom file permissions
+murmur export --chmod 0640 --file /tmp/secrets.env
+
+# Change file ownership (requires root)
+murmur export --chown 1001 --file /tmp/secrets.env
+```
+
+### Configuration via environment variables
+
+All export options can be configured via environment variables:
+
+```bash
+export MURMUR_EXPORT_FILE="/dev/shm/secrets.env"
+export MURMUR_EXPORT_FORMAT="dotenv"
+export MURMUR_EXPORT_CHMOD="0600"
+export MURMUR_EXPORT_CHOWN="1001"
+murmur export
+```
 
 ## Adding Murmur to a container image
 

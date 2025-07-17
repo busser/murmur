@@ -22,6 +22,7 @@ func rootCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(runCmd())
+	cmd.AddCommand(exportCmd())
 	cmd.AddCommand(execCmd()) // Deprecated
 
 	return cmd
