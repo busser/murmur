@@ -44,6 +44,10 @@ test: ## Run unit tests.
 test-e2e: ## Run all tests, including end-to-end tests.
 	go test -tags=e2e ./...
 
+.PHONY: test-lambda
+test-lambda: release-dry-run ## Test Lambda extension using SAM local.
+	./lambda/test.sh
+
 ##@ Build
 
 .PHONY: build

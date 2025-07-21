@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Test template for murmur Lambda extension
+
+Parameters:
+  ExtensionPackage:
+    Type: String
+    Default: "../../dist/murmur-lambda-extension_v0.7.0-next_x86_64.zip"
+    Description: Path to the murmur extension package
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: python3.12
+    MemorySize: 256
+
+Resources:
+  MurmurExtensionLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: murmur-extension-test
+      ContentUri: !Ref ExtensionPackage
+      CompatibleRuntimes:
+        - python3.12
+      Description: Murmur Lambda extension for testing
+
+  TestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: murmur-extension-test
+      CodeUri: ./
+      Handler: function.lambda_handler
+      Layers:
+        - !Ref MurmurExtensionLayer
+      Environment:
+        Variables:
+          # Test secrets using passthrough provider
+          SECRET_ONE: "passthrough:test-value-1"
+          SECRET_TWO: "passthrough:test-value-2" 
+          SECRET_THREE: "passthrough:hello-world-123"
+          # Extension configuration
+          MURMUR_EXPORT_FILE: "/tmp/secrets.env"
+          MURMUR_EXPORT_FORMAT: "dotenv"
+          MURMUR_EXPORT_REFRESH_INTERVAL: "0s"  # Disable refresh for testing 

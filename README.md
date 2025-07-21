@@ -170,6 +170,49 @@ spec:
       emptyDir: {}
 ```
 
+## Adding Murmur to AWS Lambda functions
+
+Murmur provides a Lambda extension that decouples your function code from secret management by automatically exporting secrets to files when your function starts. This approach allows your application to read secrets from a standard file location without needing to know which secret provider is being used.
+
+The extension runs as a background process that fetches secrets and writes them to `/tmp/secrets.env` by default. It also handles secret refresh with configurable TTL, which is essential for AWS Lambda SnapStart deployments where restored snapshots could otherwise contain expired secrets.
+
+To use Murmur in Lambda, add the extension as a layer and configure your secrets through environment variables:
+
+```yaml
+# serverless.yml example
+functions:
+  myFunction:
+    handler: index.handler
+    layers:
+      - arn:aws:lambda:[region]:[account]:layer:murmur-extension:[version]
+    environment:
+      # Your secret references
+      DATABASE_URL: "awssm:prod/database/connection-string"
+      API_KEY: "awssm:prod/api/credentials|jsonpath:{.key}"
+      
+      # Extension configuration (optional, default values shown)
+      MURMUR_EXPORT_FILE: "/tmp/secrets.env"
+      MURMUR_EXPORT_FORMAT: "dotenv"
+      MURMUR_EXPORT_REFRESH_INTERVAL: "1m"
+      MURMUR_EXPORT_SECRETS_TTL: "10m"
+```
+
+Your function code then reads the exported secrets file:
+
+```javascript
+// Load secrets from file instead of making API calls
+const fs = require('fs');
+const secretsFile = process.env.MURMUR_EXPORT_FILE || '/tmp/secrets.env';
+const secrets = require('dotenv').parse(fs.readFileSync(secretsFile));
+
+exports.handler = async (event) => {
+    // Use secrets without knowing their source
+    const dbUrl = secrets.DATABASE_URL;
+    const apiKey = secrets.API_KEY;
+    // ... your application logic
+};
+```
+
 ## Parsing JSON secrets
 
 Storing secrets as JSON is a common pattern. For example, a secret might contain

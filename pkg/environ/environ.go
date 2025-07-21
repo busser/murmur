@@ -1,6 +1,9 @@
 package environ
 
-import "strings"
+import (
+	"os"
+	"strings"
+)
 
 // ToMap takes strings in the form "key=value", as output by os.Environ, and
 // returns a corresponding map. It panics if any of the strings are in the wrong
@@ -30,4 +33,12 @@ func ToSlice(env map[string]string) []string {
 	}
 
 	return s
+}
+
+// GetEnvWithDefault returns environment variable value or default if not set
+func GetEnvWithDefault(envVar, defaultValue string) string {
+	if value := os.Getenv(envVar); value != "" {
+		return value
+	}
+	return defaultValue
 }

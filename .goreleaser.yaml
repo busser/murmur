@@ -25,6 +25,17 @@ builds:
       - windows
       - darwin
     main: ./
+  # Lambda extension build - Linux only with Lambda-supported architectures
+  - id: murmur-lambda
+    binary: extensions/murmur
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    main: ./
 
 archives:
   - id: murmur
@@ -59,6 +70,22 @@ archives:
     files:
       - LICENSE
       - README.md
+  # Lambda extension packages for AWS Lambda layers
+  - id: lambda-extension
+    builds: [murmur-lambda]
+    name_template: >-
+      {{- .ProjectName }}-lambda-extension_
+      {{- .Version }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else }}{{ .Arch }}{{ end }}
+    format: zip
+    wrap_in_directory: false
+    strip_binary_directory: false
+    files:
+      - src: "LICENSE"
+        dst: "murmur/LICENSE"
+      - src: "README.md"
+        dst: "murmur/README.md"
 
 dockers:
   - id: murmur

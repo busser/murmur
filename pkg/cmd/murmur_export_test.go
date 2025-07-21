@@ -4,122 +4,9 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/busser/murmur/pkg/environ"
 )
-
-// TestParseFileMode tests octal file permission parsing
-func TestParseFileMode(t *testing.T) {
-	tests := []struct {
-		name     string
-		input    string
-		expected os.FileMode
-		wantErr  bool
-	}{
-		{
-			name:     "valid octal with leading zero",
-			input:    "0600",
-			expected: 0600,
-			wantErr:  false,
-		},
-		{
-			name:     "valid octal without leading zero",
-			input:    "644",
-			expected: 0644,
-			wantErr:  false,
-		},
-		{
-			name:     "empty string defaults to 0600",
-			input:    "",
-			expected: 0600,
-			wantErr:  false,
-		},
-		{
-			name:    "invalid octal number",
-			input:   "888",
-			wantErr: true,
-		},
-		{
-			name:    "permissions too high",
-			input:   "1000",
-			wantErr: true,
-		},
-		{
-			name:    "non-numeric input",
-			input:   "abc",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result, err := parseFileMode(tt.input)
-			if tt.wantErr {
-				if err == nil {
-					t.Errorf("parseFileMode(%q) expected error, got nil", tt.input)
-				}
-				return
-			}
-			if err != nil {
-				t.Errorf("parseFileMode(%q) unexpected error: %v", tt.input, err)
-				return
-			}
-			if result != tt.expected {
-				t.Errorf("parseFileMode(%q) = %o, expected %o", tt.input, result, tt.expected)
-			}
-		})
-	}
-}
-
-// TestParseUID tests user ID parsing
-func TestParseUID(t *testing.T) {
-	tests := []struct {
-		name     string
-		input    string
-		expected int
-		wantErr  bool
-	}{
-		{
-			name:     "valid UID",
-			input:    "1000",
-			expected: 1000,
-			wantErr:  false,
-		},
-		{
-			name:     "empty string returns -1",
-			input:    "",
-			expected: -1,
-			wantErr:  false,
-		},
-		{
-			name:    "negative UID",
-			input:   "-1",
-			wantErr: true,
-		},
-		{
-			name:    "non-numeric input",
-			input:   "abc",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result, err := parseUID(tt.input)
-			if tt.wantErr {
-				if err == nil {
-					t.Errorf("parseUID(%q) expected error, got nil", tt.input)
-				}
-				return
-			}
-			if err != nil {
-				t.Errorf("parseUID(%q) unexpected error: %v", tt.input, err)
-				return
-			}
-			if result != tt.expected {
-				t.Errorf("parseUID(%q) = %d, expected %d", tt.input, result, tt.expected)
-			}
-		})
-	}
-}
 
 // TestNewExportConfigFromFlags tests CLI flag validation and config creation
 func TestNewExportConfigFromFlags(t *testing.T) {
@@ -243,7 +130,7 @@ func TestGetEnvWithDefault(t *testing.T) {
 				defer os.Unsetenv(tt.envVar)
 			}
 
-			result := getEnvWithDefault(tt.envVar, tt.defaultValue)
+			result := environ.GetEnvWithDefault(tt.envVar, tt.defaultValue)
 			if result != tt.expected {
 				t.Errorf("getEnvWithDefault(%q, %q) = %q, expected %q",
 					tt.envVar, tt.defaultValue, result, tt.expected)
