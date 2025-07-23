@@ -187,8 +187,11 @@ func main() {
         "DEBUG_MODE":  "passthrough:true", // Non-secret values pass through
     }
 
-    // Resolve all secrets
+    // Resolve all envvars with secrets
     resolved, err := murmur.ResolveAll(secrets)
+    // --OR--
+    // Resolve only secrets envvars
+    resolved, err := murmur.ResolveSecrets(secrets)
     if err != nil {
         log.Fatal(err)
     }
