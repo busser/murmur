@@ -35,11 +35,11 @@ terraform {
   required_providers {
     scaleway = {
       source  = "scaleway/scaleway"
-      version = "2.55.0"
+      version = "2.63.0"
     }
     github = {
       source  = "integrations/github"
-      version = "6.6.0"
+      version = "6.8.3"
     }
   }
 }
