@@ -26,26 +26,58 @@ type variable struct {
 }
 
 // ResolveAll resolves all secret references in the input map and returns the resolved values.
-// 
+//
 // Input map keys are preserved. Values that contain valid murmur queries (format: "provider:ref|filter:rule")
 // are resolved by fetching from the appropriate secret store. Values without valid queries pass through unchanged.
 //
 // The resolution process:
-//   1. Parse each value to identify secret queries
-//   2. Group queries by provider for concurrent resolution  
-//   3. Apply filters (like JSONPath) to transform resolved secrets
-//   4. Return final environment-ready values
+//  1. Parse each value to identify secret queries
+//  2. Group queries by provider for concurrent resolution
+//  3. Apply filters (like JSONPath) to transform resolved secrets
+//  4. Return final environment-ready values
 //
 // Example:
-//   input := map[string]string{
-//       "DB_PASSWORD": "awssm:prod/database#AWSCURRENT",
-//       "API_KEY": "gcpsm:my-project/api-key|jsonpath:{.token}",
-//       "DEBUG": "true", // passes through unchanged
-//   }
-//   resolved, err := ResolveAll(input)
+//
+//	input := map[string]string{
+//	    "DB_PASSWORD": "awssm:prod/database#AWSCURRENT",
+//	    "API_KEY": "gcpsm:my-project/api-key|jsonpath:{.token}",
+//	    "DEBUG": "true", // passes through unchanged
+//	}
+//	resolved, err := ResolveAll(input)
 //
 // Returns an error if any secret resolution fails. Partial results are not returned on error.
 func ResolveAll(vars map[string]string) (map[string]string, error) {
+	return resolve(vars, false)
+}
+
+// ResolveSecrets resolves only secret references in the input map and returns the resolved values.
+//
+// Unlike ResolveAll, this function filters out environment variables that don't contain valid
+// murmur queries, returning only the resolved secret values. This is useful for export scenarios
+// where only secrets should be written to output files.
+//
+// Input map keys are preserved for variables containing valid queries. Values that don't contain
+// valid murmur queries are excluded from the result.
+//
+// Example:
+//
+//	input := map[string]string{
+//	    "DB_PASSWORD": "awssm:prod/database#AWSCURRENT",
+//	    "API_KEY": "gcpsm:my-project/api-key|jsonpath:{.token}",
+//	    "DEBUG": "true", // excluded from result
+//	}
+//	resolved, err := ResolveSecrets(input)
+//	// resolved contains only DB_PASSWORD and API_KEY
+//
+// Returns an error if any secret resolution fails. Partial results are not returned on error.
+func ResolveSecrets(vars map[string]string) (map[string]string, error) {
+	return resolve(vars, true)
+}
+
+// resolve is the core resolution function that handles both all-variables and secrets-only modes.
+// When onlySecrets is true, only variables with valid queries are processed and returned.
+// When onlySecrets is false, all variables are processed (current ResolveAll behavior).
+func resolve(vars map[string]string, onlySecrets bool) (map[string]string, error) {
 	var (
 		rawVars  = make(chan variable, len(vars))
 		parsed   = make(chan variable, len(vars))
@@ -68,7 +100,7 @@ func ResolveAll(vars map[string]string) (map[string]string, error) {
 	// Next, launch the first step of the pipeline: parsing.
 
 	go func() {
-		parseVariables(rawVars, parsed, done)
+		parseVariables(rawVars, parsed, done, onlySecrets)
 		close(parsed)
 	}()
 
@@ -106,12 +138,16 @@ func ResolveAll(vars map[string]string) (map[string]string, error) {
 	return newVars, nil
 }
 
-func parseVariables(rawVars <-chan variable, parsed, done chan<- variable) {
+func parseVariables(rawVars <-chan variable, parsed, done chan<- variable, onlySecrets bool) {
 	for v := range rawVars {
 		q, err := parseQuery(v.rawValue)
 		if err != nil {
-			// The variable's value is not a murmur query, so we should leave
-			// it as is.
+			// The variable's value is not a murmur query.
+			if onlySecrets {
+				// In secrets-only mode, skip non-secret variables
+				continue
+			}
+			// In all-variables mode, pass through unchanged
 			v.finalValue = v.rawValue
 			done <- v
 			continue
@@ -119,6 +155,11 @@ func parseVariables(rawVars <-chan variable, parsed, done chan<- variable) {
 		if _, known := ProviderFactories[q.providerID]; !known {
 			// The variable's value looks like a query but the provider is
 			// unknown. It probably isn't a query.
+			if onlySecrets {
+				// In secrets-only mode, skip non-secret variables
+				continue
+			}
+			// In all-variables mode, pass through unchanged
 			// ?(busser): should we log a message here?
 			v.finalValue = v.rawValue
 			done <- v
@@ -127,6 +168,11 @@ func parseVariables(rawVars <-chan variable, parsed, done chan<- variable) {
 		if _, known := Filters[q.filterID]; q.filterID != "" && !known {
 			// The variable's value looks like a query but the filter is
 			// unknown. It probably isn't a query.
+			if onlySecrets {
+				// In secrets-only mode, skip non-secret variables
+				continue
+			}
+			// In all-variables mode, pass through unchanged
 			// ?(busser): should we log a message here?
 			v.finalValue = v.rawValue
 			done <- v
